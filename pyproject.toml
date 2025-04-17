@@ -1,0 +1,17 @@
+[project]
+name = "healpix-painter"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "tomas-cabrera", email = "tcabrera@andrew.cmu.edu" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "ligo-skymap>=2.2.2",
+    "pytest>=8.3.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
