@@ -1,3 +1,6 @@
+# decam images
+**/c4d_*.fits
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

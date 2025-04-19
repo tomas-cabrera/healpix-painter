@@ -1,7 +1,16 @@
-# healpix_painter
+# healpix-painter
 
 My attempt at writing a package to optimize coverage of HEALPix skymaps with wide-field telescopes.
 At the moment I'm using this readme to plan the package.
+
+## Notes on uv
+
+Currently I'm using [uv]{https://docs.astral.sh/uv/} to manage the package, which seems to be working well.
+The docs are pretty clear on how to do things; here are a couple particular notes that are not the most intuitive:
+- Packages are added with `uv add <package>`, not `pip` or any other tool.
+See <https://docs.astral.sh/uv/concepts/projects/dependencies/> for more details.
+- Don't forget to run `uv run pre-commit run --all-files` before commits!
+- Scripts can be run with e.g. `uv run python scratchwork/get_footprint_coords_decam.py` to use the package environment
 
 ## Package planning
 

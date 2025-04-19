@@ -7,5 +7,4 @@ def basic_painter(
 ):
     # Load skymap
     sm = parse_skymap_args(healpixfilename, lvkeventid)
-
-    #
+    print(sm)
