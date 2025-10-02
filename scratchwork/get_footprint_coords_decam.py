@@ -1,10 +1,13 @@
-from astropy.io import fits
-import jax.numpy as jnp
 import os.path as pa
-from astropy.wcs import WCS
-import healpix_painter
-from healpix_painter.io import footprints
 from urllib.request import urlretrieve
+
+import jax.numpy as jnp
+from astropy.io import fits
+from astropy.wcs import WCS
+from scipy.spatial import ConvexHull
+
+import healpix_painter
+from healpix_painter import footprints
 
 fits_url = (
     "https://astroarchive.noirlab.edu/api/retrieve/8d0a5a25dc24a692f6356684b5b1a7ba/"
@@ -114,7 +117,11 @@ footprint_read = footprints.Footprint(regions_file=footprint_path)
 cornras_rotated_read = jnp.array(footprint_read.region_coords[:, 0, :])
 corndecs_rotated_read = jnp.array(footprint_read.region_coords[:, 1, :])
 # These should be roughly identical (entries should be ~0)
-print(footprint_read.region_coords - footprint.region_coords)
+coord_errors = footprint_read.region_coords - footprint.region_coords
+tol = 0.25
+print(
+    f'After reload of saved footprint, median coordinate error is {jnp.median(coord_errors) * 3600:.3f}", with {jnp.sum(coord_errors > tol / 3600)}/{jnp.prod(jnp.array(coord_errors.shape))} coords off by >{tol}" arcsec'
+)
 
 # from footprints import DECamFootprint
 # print(DECamFootprint.region_coords - footprint.region_coords)
@@ -135,3 +142,21 @@ print(footprint_read.region_coords - footprint.region_coords)
 #     jnp.pixel_region.plot()
 # plt.show()
 # plt.close()
+
+### Convex hull
+
+ras_temp = ras_rotated_flat
+decs_temp = decs_rotated_flat
+
+# Modification to ras avoids having to deal with meridian
+hull = ConvexHull(jnp.array([(ras_temp + 180) % 360, decs_temp]).T)
+ras_hull = ras_temp[hull.vertices]
+decs_hull = decs_temp[hull.vertices]
+
+# Package into region and save
+hull_coords = jnp.array([[ras_hull, decs_hull]])
+hullprint = footprints.Footprint(region_coords=hull_coords)
+hullprint_path = (
+    f"{pa.dirname(healpix_painter.__file__)}/data/footprints/decam_convexhull.crtf"
+)
+hullprint.regions.write(hullprint_path, overwrite=True)

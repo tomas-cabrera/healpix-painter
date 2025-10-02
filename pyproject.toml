@@ -10,8 +10,11 @@ requires-python = ">=3.12"
 dependencies = [
     "jax[cuda12]>=0.6.0",
     "ligo-skymap>=2.2.2",
+    "pandas>=2.3.0",
+    "parmap>=1.7.0",
     "pytest>=8.3.5",
     "regions>=0.10",
+    "typer>=0.16.0",
 ]
 
 [build-system]
@@ -22,4 +25,9 @@ build-backend = "hatchling.build"
 dev = [
     "pre-commit>=4.2.0",
     "ruff>=0.11.6",
+]
+
+[tool.ruff]
+exclude = [
+    "scratchwork",
 ]
