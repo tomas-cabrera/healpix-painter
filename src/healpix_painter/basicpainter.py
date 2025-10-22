@@ -12,12 +12,56 @@ from healpix_painter.tilings import decam
 from healpix_painter.tilings.clustering import cluster_skycoord
 
 
+def score_by_probsum(hpx_probs, in_footprint):
+    # Calculate probability coverage using only non-covered pixels
+    exp_probs = (in_footprint * hpx_probs).sum(axis=1)
+    # Return
+    return exp_probs
+
+
+def score_by_probden_probsum(hpx_probs, in_footprint):
+    # Mask hpx not in footprints
+    footprint_hpx_probs = in_footprint * hpx_probs
+    # Get maximum prob
+    max_prob = footprint_hpx_probs.max(axis=1)
+    # Calculate probability coverage using only non-covered pixels
+    probsum = footprint_hpx_probs.sum(axis=1)
+    # Make dataframe
+    df = pd.DataFrame({"max_prob": max_prob, "probsum": probsum})
+    # Sort by max_prob, then probsum
+    df.sort_values(
+        ["max_prob", "probsum"],
+        inplace=True,
+    )
+    # Add scores (zero out scores for events that cover no probability)
+    df["scores"] = np.arange(df.shape[0]) * (df["probsum"] != 0)
+    scores = df.sort_index()["scores"]
+    # Return
+    return scores
+
+
 def basic_painter(
     healpixfilename=None,
     lvkeventid=None,
     footprint=DECamConvexHull,
-    max_sep_cluster=15 * u.arcmin,
+    max_sep_cluster=1.0 * u.arcmin,
+    scoring="probsum",
 ):
+    """_summary_
+
+    Parameters
+    ----------
+    healpixfilename : _type_, optional
+        _description_, by default None
+    lvkeventid : _type_, optional
+        _description_, by default None
+    footprint : _type_, optional
+        _description_, by default DECamConvexHull
+    max_sep_cluster : _type_, optional
+        _description_, by default 1.0*u.arcmin
+    scoring : str, optional
+        _description_, by default "probsum"
+    """
     # Load skymap
     sm = healpix.parse_skymap_args(healpixfilename, lvkeventid)
     # Calculate contour regions
@@ -111,14 +155,20 @@ def basic_painter(
         # Iterate until no more coverage is possible
         while True:
             # Calculate probability coverage using only non-covered pixels
-            exp_probs = (in_footprint * hpx_probs_uncovered).sum(
-                axis=1
-            ) * nearby_coverage[f]
-            # Break if no exposures cover new prob
-            if exp_probs.max() == 0.0:
+            exp_probs = score_by_probsum(hpx_probs_uncovered, in_footprint)
+            # Calculate score, mask by filter
+            if scoring == "probsum":
+                scores = exp_probs
+            elif scoring == "probden_probsum":
+                scores = score_by_probden_probsum(hpx_probs_uncovered, in_footprint)
+            else:
+                raise NotImplementedError(f"Scoring '{scoring}' not implemented.")
+            scores *= nearby_coverage[f]
+            # Break if all scores are 0
+            if scores.max() == 0.0:
                 break
             # Select exposure covering the most probability
-            i_exp = np.argmax(exp_probs)
+            i_exp = np.argmax(scores)
             # Append coverage to total coverage (as list, so gradual coverage can be plotted)
             i_exps.append(i_exp)
             probs_added.append(exp_probs[i_exp])

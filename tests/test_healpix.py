@@ -33,8 +33,13 @@ if not pa.exists(test_skymap_filename_flattened):
     )
 
 
+def test_remote_skymap():
+    skymap = healpix.parse_skymap_args(lvk_eventname="S230922g")
+    assert skymap is not None
+
+
 def test_local_skymap():
-    skymap = healpix.parse_skymap_args(test_skymap_filename, None)
+    skymap = healpix.parse_skymap_args(skymap_filename=test_skymap_filename)
     assert skymap is not None
 
 

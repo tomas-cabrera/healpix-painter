@@ -9,7 +9,28 @@ from ligo.skymap import postprocess
 from regions import PolygonSkyRegion, Regions
 
 
-def parse_skymap_args(skymap_filename, lvk_eventname):
+def parse_skymap_args(skymap_filename=None, lvk_eventname=None):
+    """Returns skymap as astropy table.
+
+    Parameters
+    ----------
+    skymap_filename : _type_
+        _description_
+    lvk_eventname : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+
+    Raises
+    ------
+    ValueError
+        _description_
+    ValueError
+        _description_
+    """
     if skymap_filename is None and lvk_eventname is None:
         raise ValueError("Either skymap_filename or lvk_eventname must be provided.")
     if skymap_filename is not None and lvk_eventname is not None:
@@ -19,7 +40,7 @@ def parse_skymap_args(skymap_filename, lvk_eventname):
     if skymap_filename is not None:
         return Table.read(skymap_filename)
     if lvk_eventname is not None:
-        # TODO: download from GraceDB + flatten
+        # TODO: download from GraceDB (+ flatten? but always return moc version)
         pass
 
 

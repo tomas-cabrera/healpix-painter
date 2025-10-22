@@ -1,6 +1,6 @@
-from urllib.request import urlretrieve
 import os
 import os.path as pa
+from urllib.request import urlretrieve
 
 from healpix_painter.basicpainter import basic_painter
 
@@ -21,7 +21,7 @@ def test_complete():
     urlretrieve(SKYMAP_URL, SKYMAP_PATH)
 
     # Run healpix_painter
-    basic_painter(healpixfilename=SKYMAP_PATH)
+    basic_painter(healpixfilename=SKYMAP_PATH, scoring="probsum")
 
 
 if __name__ == "__main__":
