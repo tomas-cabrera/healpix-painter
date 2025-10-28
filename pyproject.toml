@@ -32,3 +32,6 @@ dev = [
 exclude = [
     "scratchwork",
 ]
+
+[project.scripts]
+healpix-painter = "healpix_painter.cli:app"

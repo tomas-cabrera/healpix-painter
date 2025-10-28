@@ -41,8 +41,8 @@ def score_by_probden_probsum(hpx_probs, in_footprint):
 
 
 def basic_painter(
-    healpixfilename=None,
-    lvkeventid=None,
+    skymap_filename=None,
+    lvk_eventname=None,
     footprint=DECamConvexHull,
     max_sep_cluster=1.0 * u.arcmin,
     scoring="probsum",
@@ -63,7 +63,7 @@ def basic_painter(
         _description_, by default "probsum"
     """
     # Load skymap
-    sm = healpix.parse_skymap_args(healpixfilename, lvkeventid)
+    sm = healpix.parse_skymap_args(skymap_filename, lvk_eventname)
     # Calculate contour regions
     # Flatten skymap
     sm_flat = lsm_moc.rasterize(sm)
@@ -198,8 +198,8 @@ def basic_painter(
         )
     plt.legend()
     plt.tight_layout()
-    plt.savefig(pa.join(pa.dirname(healpixfilename), "prob_npointings.png"))
-    plt.savefig(pa.join(pa.dirname(healpixfilename), "prob_npointings.pdf"))
+    plt.savefig(pa.join(pa.dirname(skymap_filename), "prob_npointings.png"))
+    plt.savefig(pa.join(pa.dirname(skymap_filename), "prob_npointings.pdf"))
     plt.show()
     plt.close()
     for f in decam.FILTERS:
@@ -215,7 +215,7 @@ def basic_painter(
         )
         df = pd.DataFrame({"ra": x, "dec": y, "prob": result[f]["probs_added"]})
         df.to_csv(
-            pa.join(pa.dirname(healpixfilename), f"pointings_{f}.csv"), index=False
+            pa.join(pa.dirname(skymap_filename), f"pointings_{f}.csv"), index=False
         )
         lw = alpha + 1
         # plt.scatter(
@@ -239,7 +239,7 @@ def basic_painter(
         )
         # plt.legend()
         plt.tight_layout()
-        plt.savefig(pa.join(pa.dirname(healpixfilename), f"pointings_{f}.png"))
-        plt.savefig(pa.join(pa.dirname(healpixfilename), f"pointings_{f}.pdf"))
+        plt.savefig(pa.join(pa.dirname(skymap_filename), f"pointings_{f}.png"))
+        plt.savefig(pa.join(pa.dirname(skymap_filename), f"pointings_{f}.pdf"))
         plt.show()
         plt.close()
