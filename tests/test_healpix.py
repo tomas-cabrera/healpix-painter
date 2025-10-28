@@ -3,7 +3,7 @@ import os.path as pa
 import subprocess
 from urllib.request import urlretrieve
 
-from healpix_painter.io import healpix
+from healpix_painter import healpix
 
 # Prep cache
 cachedir = pa.join(

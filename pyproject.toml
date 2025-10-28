@@ -10,6 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
     "jax[cuda12]>=0.6.0",
     "ligo-skymap>=2.2.2",
+    "lxml>=6.0.2",
     "pandas>=2.3.0",
     "parmap>=1.7.0",
     "pytest>=8.3.5",

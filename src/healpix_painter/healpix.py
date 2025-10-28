@@ -1,16 +1,26 @@
+import os
+import os.path as pa
+from urllib.request import urlretrieve
+
 import astropy.units as u
 import astropy_healpix as ah
 import jax.numpy as jnp
 import ligo.skymap.moc as lsm_moc
+import lxml.etree
 import numpy as np
+import requests
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
+from ligo.gracedb.rest import GraceDb
 from ligo.skymap import postprocess
 from regions import PolygonSkyRegion, Regions
+
+import healpix_painter
 
 
 def parse_skymap_args(skymap_filename=None, lvk_eventname=None):
     """Returns skymap as astropy table.
+    GraceDb interaction mostly cribbed from gwemopt.io.skymap
 
     Parameters
     ----------
@@ -33,15 +43,43 @@ def parse_skymap_args(skymap_filename=None, lvk_eventname=None):
     """
     if skymap_filename is None and lvk_eventname is None:
         raise ValueError("Either skymap_filename or lvk_eventname must be provided.")
-    if skymap_filename is not None and lvk_eventname is not None:
+    elif skymap_filename is not None and lvk_eventname is not None:
         raise ValueError(
             "Only one of skymap_filename or lvk_eventname should be provided."
         )
-    if skymap_filename is not None:
-        return Table.read(skymap_filename)
-    if lvk_eventname is not None:
-        # TODO: download from GraceDB (+ flatten? but always return moc version)
+    elif skymap_filename is not None:
         pass
+    elif lvk_eventname is not None:
+        # Initialize client
+        client = GraceDb()
+        # Get latest VOEvent info
+        latest_voevent = client.voevents(lvk_eventname).json()["voevents"][-1]
+        # Get latest skymap url from lxml info
+        response = requests.get(latest_voevent["links"]["file"], timeout=60)
+        root = lxml.etree.fromstring(response.content)
+        params = {
+            elem.attrib["name"]: elem.attrib["value"]
+            for elem in root.iterfind(".//Param")
+        }
+        skymap_url = params["skymap_fits"]
+        # Make local path
+        skymap_filename = pa.join(
+            pa.dirname(healpix_painter.__file__),
+            "data",
+            "skymaps",
+            ".cache",
+            lvk_eventname,
+            pa.basename(skymap_url),
+        )
+        # If file does not exist
+        if not pa.exists(skymap_filename):
+            # Make directories as needed
+            if not pa.exists(pa.dirname(skymap_filename)):
+                os.makedirs(pa.dirname(skymap_filename), exist_ok=True)
+            # Download file
+            print(skymap_url, skymap_filename)
+            urlretrieve(skymap_url, skymap_filename)
+    return Table.read(skymap_filename)
 
 
 def _uniq_to_lonlat(uniq):
