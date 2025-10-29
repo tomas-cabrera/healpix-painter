@@ -32,6 +32,12 @@ def healpix_painter(
             help="The scoring algorithm to use to rank pointings; 'probsum' by default"
         ),
     ] = "probsum",
+    output_dir: Annotated[
+        str,
+        typer.Option(
+            help="The output directory to save results; if not provided, uses the skymap directory"
+        ),
+    ] = None,
 ):
     """A wrapper CLI for healpix_painter routines.
 
@@ -60,6 +66,7 @@ def healpix_painter(
             lvk_eventname=lvk_eventname,
             footprint=getattr(footprints, footprint),
             scoring=scoring,
+            output_dir=output_dir,
         )
     else:
         raise ValueError(f"Routine '{routine}' not implemented.")

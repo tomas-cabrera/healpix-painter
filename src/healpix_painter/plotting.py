@@ -2,6 +2,15 @@ import matplotlib.pyplot as plt
 
 from .healpix import calc_contours_for_skymap
 
+FILTER2COLOR = {
+    "u": "xkcd:indigo",
+    "g": "xkcd:bluegreen",
+    "r": "xkcd:orangered",
+    "i": "xkcd:crimson",
+    "z": "xkcd:black",
+    "Y": "xkcd:gray",
+}
+
 
 def plot_skymap_with_contours(skymap_flat, contours, ax=None):
     # Initialize default axes if needed

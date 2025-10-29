@@ -1,5 +1,3 @@
-import os.path as pa
-
 import astropy.units as u
 import ligo.skymap.moc as lsm_moc
 import numpy as np
@@ -8,6 +6,7 @@ from astropy.coordinates import SkyCoord, match_coordinates_sky
 
 from healpix_painter import healpix
 from healpix_painter.footprints import DUMMY_WCS, DECamConvexHull
+from healpix_painter.io.output import package_results
 from healpix_painter.tilings import decam
 from healpix_painter.tilings.clustering import cluster_skycoord
 
@@ -46,6 +45,7 @@ def basic_painter(
     footprint=DECamConvexHull,
     max_sep_cluster=1.0 * u.arcmin,
     scoring="probsum",
+    output_dir=None,
 ):
     """_summary_
 
@@ -63,7 +63,7 @@ def basic_painter(
         _description_, by default "probsum"
     """
     # Load skymap
-    sm = healpix.parse_skymap_args(skymap_filename, lvk_eventname)
+    skymap_filename, sm = healpix.parse_skymap_args(skymap_filename, lvk_eventname)
     # Calculate contour regions
     # Flatten skymap
     sm_flat = lsm_moc.rasterize(sm)
@@ -179,67 +179,19 @@ def basic_painter(
             "i_exps": i_exps,
             "probs_added": probs_added,
         }
-    import matplotlib.pyplot as plt
 
-    f2c = {
-        "u": "xkcd:blue",
-        "g": "xkcd:bluegreen",
-        "r": "xkcd:orangered",
-        "i": "xkcd:crimson",
-        "z": "xkcd:black",
-        "Y": "xkcd:gray",
-    }
+    # Convert pointings to dataframes
+    selected_pointings = {}
     for f in decam.FILTERS:
-        plt.plot(
-            np.arange(len(result[f]["i_exps"])),
-            np.cumsum(result[f]["probs_added"]),
-            label=f"{f} {(np.sum(result[f]['probs_added']) * 100):.2f}% covered",
-            color=f2c[f],
-        )
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(pa.join(pa.dirname(skymap_filename), "prob_npointings.png"))
-    plt.savefig(pa.join(pa.dirname(skymap_filename), "prob_npointings.pdf"))
-    plt.show()
-    plt.close()
-    for f in decam.FILTERS:
-        n_exp = min(80, nearby_coverage[f].sum())
-        if n_exp == 0:
-            continue
         x = [nearby_coverage.iloc[i]["ra"] for i in result[f]["i_exps"]]
         y = [nearby_coverage.iloc[i]["dec"] for i in result[f]["i_exps"]]
-        alpha = np.interp(
-            result[f]["probs_added"],
-            (np.min(result[f]["probs_added"]), np.max(result[f]["probs_added"])),
-            (0.2, 1),
-        )
-        df = pd.DataFrame({"ra": x, "dec": y, "prob": result[f]["probs_added"]})
-        df.to_csv(
-            pa.join(pa.dirname(skymap_filename), f"pointings_{f}.csv"), index=False
-        )
-        lw = alpha + 1
-        # plt.scatter(
-        #     x,
-        #     y,
-        #     color=f2c[f],
-        #     alpha=alpha,
-        # )
-        for i in np.arange(min(80, len(x))):
-            fpc = footprint.rotate(x[i], y[i])
-            for fpccd in fpc:
-                plt.plot(
-                    fpccd[0],
-                    fpccd[1],
-                    color=f2c[f],
-                    alpha=alpha[i],
-                    lw=lw[i],
-                )
-        plt.title(
-            f"{f}, {(100 * np.sum(result[f]['probs_added'][: min(80, len(x))])):.2f}% covered"
-        )
-        # plt.legend()
-        plt.tight_layout()
-        plt.savefig(pa.join(pa.dirname(skymap_filename), f"pointings_{f}.png"))
-        plt.savefig(pa.join(pa.dirname(skymap_filename), f"pointings_{f}.pdf"))
-        plt.show()
-        plt.close()
+        df = pd.DataFrame({"ra": x, "dec": y, "probs_added": result[f]["probs_added"]})
+        selected_pointings[f] = df
+
+    # Package results
+    package_results(
+        skymap_filename,
+        selected_pointings,
+        footprint,
+        output_dir=output_dir,
+    )

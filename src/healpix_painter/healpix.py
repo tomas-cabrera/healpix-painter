@@ -79,7 +79,7 @@ def parse_skymap_args(skymap_filename=None, lvk_eventname=None):
             # Download file
             print(skymap_url, skymap_filename)
             urlretrieve(skymap_url, skymap_filename)
-    return Table.read(skymap_filename)
+    return skymap_filename, Table.read(skymap_filename)
 
 
 def _uniq_to_lonlat(uniq):
