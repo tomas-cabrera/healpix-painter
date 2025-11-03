@@ -1,49 +1,113 @@
 # healpix-painter
 
 My attempt at writing a package to optimize coverage of HEALPix skymaps with wide-field telescopes.
-At the moment I'm using this readme to plan the package.
+The inputs are the skymap, a set of telescope pointings to choose from, and the footprint of the telescope.
+At the moment this is focused on DECam, and so the list of pointings is automatically fetched from the NOIRLab AstroDataArchive.
 
-## Notes on uv
+The main output is a set of csv's, one for each telescope filter containing the pointings and the probability that pointing adds to the plan as ordered in the csv
+(that is, the probability contained in a footprint centered on that pointing that has not already been covered by a previous pointing).
+Additional products include plots of the pointings chosen with the given footprint; plotting the skymap has not been implemented yet.
+The final product is a plot of cumulative probability covered versus the number of pointings, to allow the user to assess the diminishing returns offered by adding more pointings to the final observation plan.
 
-Currently I'm using [uv](https://docs.astral.sh/uv/) to manage the package, which seems to be working well.
-The docs are pretty clear on how to do things; here are a couple particular notes that are not the most intuitive:
-- Packages are added with `uv add <package>`, not `pip` or any other tool.
-See <https://docs.astral.sh/uv/concepts/projects/dependencies/> for more details.
-- Don't forget to run `uv run pre-commit run --all-files` before commits!
-- Scripts can be run with e.g. `uv run python scratchwork/get_footprint_coords_decam.py` to use the package environment
+This package is intended to be simplistic, ranking all available pointings as specified and not attempting to do any kind of scheduling/packing optimization.
+This choice is motivated by the idea that the relationship between qualities of an observation plan such as filters, exposure times, and number of pointings, and the science yield is complex, and challenging to automate in a satisfactory manner.
+This package aims to produce an easily-digested summary of the options available when considering how to cover the area of HEALPix skymap, and leaves the more concrete decision making up to the human user.
 
-## Package planning
+## Installation
 
-- Read in HEALPix map
-  - In general: read in map from file
-  - GW speciality: get map from GraceDB
-    - will need to flatten skymap
-- Define telescope being used
-  - Read in from file?
-    - Focal plane: define a format that describes the focal plane as a set of polygons, with the whole set centered on the pointing of the telescope
-      - astropy regions can be written as file; choose format (CASA, DS9, or FITS) that is the easiest to define a custom focal plane with
-  - Might need to resample HEALPix map s.t. pixels are sufficiently smaller than the focal plane
-- Define telescope tiling to use
-  - In general: define a uniform tiling of the sky appropriate for the telescope focal plane
-    - Ideally will need some intelligence to choose good tilings for square vs. round focal planes
-  - Preset tiling: read in a list of pointings to choose from
-    - Extra special (for DECam): generate tiling from NOIRLab Astro Data Archive
-- Select pointings
-  - Get coords for HEALPix tiles
-  - Trim HEALPix tiles to those covering desired upper limit (optimization, to avoid working with entire map later)
-    - Can choose either % upper limit upper limit?
-    - Note that a number of pointings/time upper limit can be converted to % upper limit (add pixels until respective area is met and calculate probability, ignoring focal plane shape)
-  - Trim telescope tiling to upper limits (as previous)
-  - Pre-calculate coverage of each tile
-    - Need function that takes focal plane+pointing and HEALPixels and provides as mask identifying the covered pixels
-  - Select tiles
-    - Loop until threshold is met (%, # of pointings/time, etc.)
-      - Take current selection of pointings, add each of the next available choices, and calculate the coverage of the result
-        - The pre-calculated masks should make it easy to select covered pointings (np.any(..., axis=...))
-        - Could also sum the pixels that would be added, i.e. not in the current selection but in the next option
-      - Choose the pointing that adds the most probability and add it to the selection
-    - Might also want to implement an interactive option, where a prob covered vs. # of pointings/time plot is shown and the user can select the value appropriately
-- Output
-  - .csv or whatever with pointings
-  - plot of healpix map with overlayed pointings and % covered
-  - Special: convert pointings to DECam json (would need filters, propid, exptimes, etc.; perhaps provide template json?)
+`healpix-painter` may be installed with `pip`:
+
+```bash
+$ pip install healpix-painter
+...
+Successfully installed healpix-painter.
+```
+
+For the most current version (beware of experimental features!), install from source:
+
+```bash
+$ git clone https://github.com/tomas-cabrera/healpix-painter
+Cloning into 'healpix-painter'...
+remote: Enumerating objects: 135, done.
+remote: Counting objects: 100% (135/135), done.
+remote: Compressing objects: 100% (78/78), done.
+remote: Total 135 (delta 54), reused 118 (delta 37), pack-reused 0 (from 0)
+Receiving objects: 100% (135/135), 7.70 MiB | 12.99 MiB/s, done.
+Resolving deltas: 100% (54/54), done.
+$ pip install ./healpix_painter
+...
+Successfully installed healpix-painter.
+```
+
+## Getting started
+
+The easiest way to use `healpix_painter` is via the command-line interface (CLI).
+Basic usage and stdout looks like this:
+
+```bash
+$ healpix-painter --skymap-filename /path/to/skymap.fits.gz --output-dir ~/hp_test
+Loading skymap...
+Calculating 90% contour regions...
+Loading DECam archival pointings...
+Fetching DECam archival pointings from https://astroarchive.noirlab.edu...
+Selecting pointings near 90% contour regions...
+Found 33 clustered pointings near 90% contour regions:
+  u: 1 pointings
+  g: 28 pointings
+  r: 14 pointings
+  i: 21 pointings
+  z: 15 pointings
+  Y: 1 pointings
+Evaluating healpix coverage of pointings with footprint...
+Selecting obsplan by 'probadd' scoring...
+Saving results in ~/hp_test...
+========================================
+Coverage summary:
+  u: 11.27% (1 pointings)
+  g: 92.66% (24 pointings)
+  r: 90.45% (14 pointings)
+  i: 91.90% (21 pointings)
+  z: 89.76% (15 pointings)
+  Y: 9.33% (1 pointings)
+========================================
+```
+
+This tool was originally made to plan observations with the Dark Energy Camera (DECam).
+As such, the default configuration uses a telescope footprint representing the outline of the DECam footprint (roughly hexagonal), and obtains the list of available pointings from the [NOIRLab AstroDataArchive](https://astroarchive.noirlab.edu).
+The sections below explain some of the dials you might want to twiddle when using this tool.
+
+### I want to use a footprint other than the default DECam hexagon
+
+An alternate DECam footprint is available which represents the footprint fully as an array of CCDs; this may be enabled with the flag
+
+```bash
+--footprint DECamFootprint
+```
+
+Other telescopes may be added in the future; if you wish to do so yourself, you will need to convert your telescope footprint into a `.crtf` file that can be read by `astropy.regions`.
+See `healpix_painter.footprints.py` for more details.
+
+### I want to update the cached list of DECam pointings
+
+If one wishes to force a refresh of the cached DECam tiling from NOIRLab, add the flag
+
+```bash
+--tiling-force-update
+```
+
+### I want to automatically fetch a skymap from GraceDb instead of having to download it
+
+Instead of specifying the path to a skymap file, `healpix-painter` may be prompted to fetch the most recent GraceDb skymap for a gravitational wave event with the following flag:
+
+```bash
+--lvk-eventname SYYMMDDaa
+```
+
+### I want to change the output directory
+
+By default the output of the program is stored in the same directory as the skymap (for downloaded skymaps this is `healpix-painter/src/healpix_painter/data/skymaps/.cache/SYYMMDDaa`).
+The output directory may be specified, with the skymap copied to the output directory for ease of access:
+
+```bash
+--output-dir /path/to/output/dir
+```
