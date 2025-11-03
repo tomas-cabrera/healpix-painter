@@ -85,16 +85,13 @@ The output directory may be specified, with the skymap copied to the output dire
 --output-dir /path/to/output/dir
 ```
 
-### I want to automatically fetch a skymap from GraceDb instead of having to download it
+### I want to automatically fetch a skymap from GraceDb instead using a local skymap file
 
 Instead of specifying the path to a skymap file, `healpix-painter` may be prompted to fetch the most recent GraceDb skymap for a gravitational wave event with the following flag:
 
 ```bash
 --lvk-eventname SYYMMDDaa
 ```
-
-Other telescopes may be added in the future; if you wish to do so yourself, you will need to convert your telescope footprint into a `.crtf` file that can be read by `astropy.regions`.
-See [healpix_painter.footprints.Footprint](https://github.com/tomas-cabrera/healpix-painter/blob/main/src/healpix_painter/footprints.py#L23) for more details.
 
 ### I want to update the cached list of DECam pointings
 
@@ -111,3 +108,6 @@ An alternate DECam footprint is available which represents the footprint fully a
 ```bash
 --footprint DECamFootprint
 ```
+
+Other telescopes may be added in the future; if you wish to do so yourself, you will need to convert your telescope footprint into a `.crtf` file that can be read by `astropy.regions`.
+See [healpix_painter.footprints.Footprint](https://github.com/tomas-cabrera/healpix-painter/blob/main/src/healpix_painter/footprints.py#L23) for more details.
