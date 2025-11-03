@@ -79,7 +79,7 @@ The sections below explain some of the dials you might want to twiddle when usin
 ### I want to change the output directory
 
 By default the output of the program is stored in the same directory as the skymap (for downloaded skymaps this is `healpix-painter/src/healpix_painter/data/skymaps/.cache/SYYMMDDaa`).
-The output directory may be specified, with the skymap copied to the output directory for ease of access:
+A preferred output directory may be specified, with the skymap copied to the output directory for ease of access:
 
 ```bash
 --output-dir /path/to/output/dir
