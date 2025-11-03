@@ -45,7 +45,7 @@ The easiest way to use `healpix_painter` is via the command-line interface (CLI)
 Basic usage and stdout looks like this:
 
 ```bash
-$ healpix-painter --skymap-filename /path/to/skymap.fits.gz --output-dir ~/hp_test
+$ healpix-painter --skymap-filename /path/to/skymap/skymap.fits.gz
 Loading skymap...
 Calculating 90% contour regions...
 Loading DECam archival pointings...
@@ -60,7 +60,7 @@ Found 33 clustered pointings near 90% contour regions:
   Y: 1 pointings
 Evaluating healpix coverage of pointings with footprint...
 Selecting obsplan by 'probadd' scoring...
-Saving results in ~/hp_test...
+Saving results in /path/to/skymap...
 ========================================
 Coverage summary:
   u: 11.27% (1 pointings)
@@ -76,23 +76,13 @@ This tool was originally made to plan observations with the Dark Energy Camera (
 As such, the default configuration uses a telescope footprint representing the outline of the DECam footprint (roughly hexagonal), and obtains the list of available pointings from the [NOIRLab AstroDataArchive](https://astroarchive.noirlab.edu).
 The sections below explain some of the dials you might want to twiddle when using this tool.
 
-### I want to use a footprint other than the default DECam hexagon
+### I want to change the output directory
 
-An alternate DECam footprint is available which represents the footprint fully as an array of CCDs; this may be enabled with the flag
-
-```bash
---footprint DECamFootprint
-```
-
-Other telescopes may be added in the future; if you wish to do so yourself, you will need to convert your telescope footprint into a `.crtf` file that can be read by `astropy.regions`.
-See `healpix_painter.footprints.py` for more details.
-
-### I want to update the cached list of DECam pointings
-
-If one wishes to force a refresh of the cached DECam tiling from NOIRLab, add the flag
+By default the output of the program is stored in the same directory as the skymap (for downloaded skymaps this is `healpix-painter/src/healpix_painter/data/skymaps/.cache/SYYMMDDaa`).
+The output directory may be specified, with the skymap copied to the output directory for ease of access:
 
 ```bash
---tiling-force-update
+--output-dir /path/to/output/dir
 ```
 
 ### I want to automatically fetch a skymap from GraceDb instead of having to download it
@@ -103,11 +93,21 @@ Instead of specifying the path to a skymap file, `healpix-painter` may be prompt
 --lvk-eventname SYYMMDDaa
 ```
 
-### I want to change the output directory
+Other telescopes may be added in the future; if you wish to do so yourself, you will need to convert your telescope footprint into a `.crtf` file that can be read by `astropy.regions`.
+See [healpix_painter.footprints.Footprint](https://github.com/tomas-cabrera/healpix-painter/blob/main/src/healpix_painter/footprints.py#L23) for more details.
 
-By default the output of the program is stored in the same directory as the skymap (for downloaded skymaps this is `healpix-painter/src/healpix_painter/data/skymaps/.cache/SYYMMDDaa`).
-The output directory may be specified, with the skymap copied to the output directory for ease of access:
+### I want to update the cached list of DECam pointings
+
+If one wishes to force a refresh of the cached DECam tiling from NOIRLab, add the flag
 
 ```bash
---output-dir /path/to/output/dir
+--tiling-force-update
+```
+
+### I want to use a footprint other than the default DECam hexagon
+
+An alternate DECam footprint is available which represents the footprint fully as an array of CCDs; this may be enabled with the flag
+
+```bash
+--footprint DECamFootprint
 ```
