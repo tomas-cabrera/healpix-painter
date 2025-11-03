@@ -85,7 +85,7 @@ The output directory may be specified, with the skymap copied to the output dire
 --output-dir /path/to/output/dir
 ```
 
-### I want to automatically fetch a skymap from GraceDb instead using a local skymap file
+### I want to fetch a skymap from GraceDb instead using a local skymap file
 
 Instead of specifying the path to a skymap file, `healpix-painter` may be prompted to fetch the most recent GraceDb skymap for a gravitational wave event with the following flag:
 
