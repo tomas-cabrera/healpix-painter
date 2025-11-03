@@ -15,6 +15,21 @@ def package_results(
     footprint,
     output_dir=None,
 ):
+    """Format painter output to standarized files and plots.
+
+    Parameters
+    ----------
+    skymap_filename : str
+        The path to the skymap used for tiling.
+    selected_pointings : dict of pd.DataFrames
+        Dictionary containing the selected pointings.
+        Keys should be filter names, and values should be pandas DataFrames with columns 'ra', 'dec', and 'probs_added', with the ultimate column containing the amount of probability that pointing adds to the observation plan.
+    footprint : healpix_painter.footprints.Footprint
+        The footprint object used for tiling.
+    output_dir : str, optional
+        The directory to save the output in.
+        If None, uses the directory the skymap is in (default behavior).
+    """
     # Copy skymap to output directory, or define output as skymap directory
     if output_dir is not None:
         # Make output dir
@@ -23,20 +38,28 @@ def package_results(
         shutil.copy(skymap_filename, output_dir)
     else:
         output_dir = pa.dirname(skymap_filename)
+    print(f"Saving results in {output_dir}...")
 
     # Make prob vs n_pointings plot
     plt.figure(figsize=(4, 3))
+    print("=" * 40)
+    print("Coverage summary:")
     for f in selected_pointings.keys():
+        n_pointings = selected_pointings[f].shape[0]
+        total_prob = np.sum(selected_pointings[f]["probs_added"])
+        print(f"\t{f}: {total_prob * 100:.2f}% ({n_pointings} pointings)")
         plt.plot(
-            np.arange(len(selected_pointings[f]["probs_added"])),
+            np.arange(n_pointings) + 1,
             np.cumsum(selected_pointings[f]["probs_added"]),
             label=f"{f} {(np.sum(selected_pointings[f]['probs_added']) * 100):.2f}% covered",
             color=FILTER2COLOR.get(f),
         )
+    print("=" * 40)
     plt.legend()
-    plt.tight_layout()
     plt.xlabel("Number of Pointings")
     plt.ylabel("Cumulative Probability Covered")
+    plt.gca().xaxis.set_major_locator(plt.MaxNLocator(integer=True))
+    plt.tight_layout()
     plt.savefig(pa.join(output_dir, "cumprob_npointings.png"))
     plt.savefig(pa.join(output_dir, "cumprob_npointings.pdf"))
     plt.close()

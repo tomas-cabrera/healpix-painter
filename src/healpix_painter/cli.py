@@ -26,12 +26,16 @@ def healpix_painter(
             help="The telescope footprint to use for tiling; DECamConvexHull by default"
         ),
     ] = "DECamConvexHull",
+    tiling_force_update: Annotated[
+        bool,
+        typer.Option(help="Whether to force update the tiling cache; False by default"),
+    ] = False,
     scoring: Annotated[
         str,
         typer.Option(
-            help="The scoring algorithm to use to rank pointings; 'probsum' by default"
+            help="The scoring algorithm to use to rank pointings; 'probadd' by default"
         ),
-    ] = "probsum",
+    ] = "probadd",
     output_dir: Annotated[
         str,
         typer.Option(
@@ -39,25 +43,34 @@ def healpix_painter(
         ),
     ] = None,
 ):
-    """A wrapper CLI for healpix_painter routines.
+    """Function governing CLI interface.
 
     Parameters
     ----------
-    routine : Annotated[ str, typer.Option, optional
-        _description_, by default "The healpix_painter routine to use; 'basic_painter' by default" ), ]="basic_painter"
-    healpixfilename : Annotated[ str, typer.Option, optional
-        _description_, by default "The path to the HEALPix skymap to tile"), ]=None
-    lvk_eventname : Annotated[ str, typer.Option, optional
-        _description_, by default "The LVK event id to tile"), ]=None
-    footprint : Annotated[ str, typer.Option, optional
-        _description_, by default "The telescope footprint to use for tiling; DECamConvexHull by default" ), ]="DECamConvexHull"
-    scoring : Annotated[ str, typer.Option, optional
-        _description_, by default "The scoring algorithm to use to rank pointings; 'probsum' by default" ), ]="probsum"
+    routine : str, optional
+        The healpix_painter routine to use; 'basic_painter' by default.
+    skymap_filename : str, optional
+        The path to the HEALPix skymap to tile.
+        Either skymap_filename or lvk_eventname must be provided.
+    lvk_eventname : str, optional
+        The LVK event id to tile
+        Either skymap_filename or lvk_eventname must be provided.
+    footprint : str, optional
+        The telescope footprint to use for tiling; 'DECamConvexHull' by default.
+    tiling_force_update : bool, optional
+        Whether to force update the tiling cache; False by default.
+    scoring : str, optional
+        The scoring algorithm to use to rank pointings; 'probadd' by default.
+        Possible options are:
+        - 'probadd': Score by total probability added by each pointing, ignoring previously covered pixels.
+        - 'probden_probadd': Score by maximum probability density in each pointing, breaking ties by total probability added.
+    output_dir : str, optional
+        The output directory to save results; if not provided, uses the directory the skymap is in.
 
     Raises
     ------
     ValueError
-        _description_
+        If the routine specified is not implemented.
     """
     # Select routine
     if routine == "basic_painter":
@@ -65,6 +78,7 @@ def healpix_painter(
             skymap_filename=skymap_filename,
             lvk_eventname=lvk_eventname,
             footprint=getattr(footprints, footprint),
+            tiling_force_update=tiling_force_update,
             scoring=scoring,
             output_dir=output_dir,
         )

@@ -101,15 +101,14 @@ MAX_SEP = 60 * u.arcsec
 
 
 def calc_neighbors_for_healpix(i_hpx):
-    """This function calculates the neighborhood relations for one HEALPix tile of a given index and order.
+    """_summary_
+    This function calculates the neighborhood relations for one HEALPix tile of a given index and order.
     Doing this in ring because it's entirely internal and requires less lines.
 
     Parameters
     ----------
-    i_hpx : _type_
-        _description_
-    level : int, optional
-        _description_, by default 3
+    i_hpx : int
+        The HEALPix index of the tile to process.
     """
     # Get hpx vertices
     hpx_corners = ah.boundaries_lonlat(

@@ -24,22 +24,22 @@ def parse_skymap_args(skymap_filename=None, lvk_eventname=None):
 
     Parameters
     ----------
-    skymap_filename : _type_
-        _description_
-    lvk_eventname : _type_
-        _description_
+    skymap_filename : str, optional
+        The path to the HEALPix skymap to tile.
+        Either skymap_filename or lvk_eventname must be provided.
+    lvk_eventname : str, optional
+        The LVK event id to tile
+        Either skymap_filename or lvk_eventname must be provided.
 
     Returns
     -------
-    _type_
-        _description_
+    str, astropy.table.Table
+        The skymap filename and the skymap as an astropy table.
 
     Raises
     ------
     ValueError
-        _description_
-    ValueError
-        _description_
+        If either skymap_filename or lvk_eventname are not provided, or both are.
     """
     if skymap_filename is None and lvk_eventname is None:
         raise ValueError("Either skymap_filename or lvk_eventname must be provided.")
@@ -50,6 +50,7 @@ def parse_skymap_args(skymap_filename=None, lvk_eventname=None):
     elif skymap_filename is not None:
         pass
     elif lvk_eventname is not None:
+        print(f"Fetching skymap for {lvk_eventname} from GraceDb...")
         # Initialize client
         client = GraceDb()
         # Get latest VOEvent info
@@ -77,8 +78,10 @@ def parse_skymap_args(skymap_filename=None, lvk_eventname=None):
             if not pa.exists(pa.dirname(skymap_filename)):
                 os.makedirs(pa.dirname(skymap_filename), exist_ok=True)
             # Download file
-            print(skymap_url, skymap_filename)
+            print(f"Downloading skymap from {skymap_url} to {skymap_filename}...")
             urlretrieve(skymap_url, skymap_filename)
+        else:
+            print(f"Using cached skymap at {skymap_filename}...")
     return skymap_filename, Table.read(skymap_filename)
 
 
@@ -99,19 +102,19 @@ def _get_probs_for_skymap(skymap):
 
 
 def calc_radecs_for_skymap(skymap, flat_order="nested"):
-    """Returns in radians
+    """Using the UNIQ/HEALPix indexing, calculate the RA and DEC for each pixel in the skymap.
 
     Parameters
     ----------
-    skymap : _type_
-        _description_
+    skymap : astropy.table.Table
+        The skymap as an astropy table.
     flat_order : str, optional
-        _description_, by default "nested"
+        The indexing scheme of the flattened skymap; either 'nested' (default) or 'ring'.
 
     Returns
     -------
-    _type_
-        _description_
+    np.ndarray, np.ndarray
+        The RA and DEC arrays, in decimal degrees.
     """
     if "UNIQ" in skymap.columns:
         ra, dec = _uniq_to_lonlat(skymap["UNIQ"])

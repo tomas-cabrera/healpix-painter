@@ -24,6 +24,7 @@ def get_archival_tiling(force_update=False):
     else:
         NATROOT = "https://astroarchive.noirlab.edu"
         ADSURL = f"{NATROOT}/api/adv_search"
+        print(f"Fetching DECam archival pointings from {NATROOT}...")
 
         JJ = {
             "outfields": [

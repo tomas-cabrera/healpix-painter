@@ -21,7 +21,7 @@ def test_complete():
     urlretrieve(SKYMAP_URL, SKYMAP_PATH)
 
     # Run healpix_painter
-    basic_painter(skymap_filename=SKYMAP_PATH, scoring="probsum")
+    basic_painter(skymap_filename=SKYMAP_PATH, scoring="probadd")
 
 
 if __name__ == "__main__":

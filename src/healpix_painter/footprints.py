@@ -40,10 +40,22 @@ class Footprint:
 
         Parameters
         ----------
-        regions : _type_
-            _description_
-        mount : str, "equatorial" or "altaz"
-            Telescope mounting, by default "equatorial"
+        regions_file : str, optional
+            Path to an astropy.regions.Regions file containing the footprint, by default None
+            Either regions_file or region_coords must be provided.
+        region_coords : list-like, optional
+            A list-like containing the region coordinates.
+            Each entry in the list should be a 2 x N array-like, where the first row contains the RA for the N region vertices,
+            and the second row contains the DEC for the same (both in decimal degrees).
+            For the time being we assume that all regions have the same number of vertices, to clean up some matrix operations.
+            Either regions_file or region_coords must be provided.
+        mount : str, optional
+            Telescope mount to use, by default "equatorial"
+
+        Raises
+        ------
+        ValueError
+            If neither regions_file nor region_coords are provided, or both are.
         """
         if regions_file is not None and region_coords is None:
             self.regions = Regions.read(regions_file)
@@ -187,13 +199,13 @@ class Footprint:
 
         Returns
         -------
-        _type_
-            _description_
+        jnp.ndarray
+            The rotated region coordinates, as an n_regions x 2 x n_vertices_per_region array.
 
         Raises
         ------
         NotImplementedError
-            _description_
+            If the mount specified is not implemented.
         """
         if self.mount == "equatorial":
             return self._rotate_equatorial(ra, dec)

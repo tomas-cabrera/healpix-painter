@@ -11,29 +11,29 @@ from healpix_painter.tilings import decam
 from healpix_painter.tilings.clustering import cluster_skycoord
 
 
-def score_by_probsum(hpx_probs, in_footprint):
+def score_by_probadd(hpx_probs, in_footprint):
     # Calculate probability coverage using only non-covered pixels
     exp_probs = (in_footprint * hpx_probs).sum(axis=1)
     # Return
     return exp_probs
 
 
-def score_by_probden_probsum(hpx_probs, in_footprint):
+def score_by_probden_probadd(hpx_probs, in_footprint):
     # Mask hpx not in footprints
     footprint_hpx_probs = in_footprint * hpx_probs
     # Get maximum prob
     max_prob = footprint_hpx_probs.max(axis=1)
     # Calculate probability coverage using only non-covered pixels
-    probsum = footprint_hpx_probs.sum(axis=1)
+    probadd = footprint_hpx_probs.sum(axis=1)
     # Make dataframe
-    df = pd.DataFrame({"max_prob": max_prob, "probsum": probsum})
-    # Sort by max_prob, then probsum
+    df = pd.DataFrame({"max_prob": max_prob, "probadd": probadd})
+    # Sort by max_prob, then probadd
     df.sort_values(
-        ["max_prob", "probsum"],
+        ["max_prob", "probadd"],
         inplace=True,
     )
     # Add scores (zero out scores for events that cover no probability)
-    df["scores"] = np.arange(df.shape[0]) * (df["probsum"] != 0)
+    df["scores"] = np.arange(df.shape[0]) * (df["probadd"] != 0)
     scores = df.sort_index()["scores"]
     # Return
     return scores
@@ -43,35 +43,55 @@ def basic_painter(
     skymap_filename=None,
     lvk_eventname=None,
     footprint=DECamConvexHull,
+    tiling_force_update=False,
     max_sep_cluster=1.0 * u.arcmin,
-    scoring="probsum",
+    scoring="probadd",
     output_dir=None,
 ):
-    """_summary_
+    """Tile the skymap using the given footprint and the given scoring algorithm.
+    Currently uses DECam archival pointings.
 
     Parameters
     ----------
-    healpixfilename : _type_, optional
-        _description_, by default None
-    lvkeventid : _type_, optional
-        _description_, by default None
-    footprint : _type_, optional
-        _description_, by default DECamConvexHull
-    max_sep_cluster : _type_, optional
-        _description_, by default 1.0*u.arcmin
+    skymap_filename : str, optional
+        The path to the HEALPix skymap to tile.
+        Either skymap_filename or lvk_eventname must be provided.
+    lvk_eventname : str, optional
+        The LVK event id to tile
+        Either skymap_filename or lvk_eventname must be provided.
+    footprint : healpix_painter.footprints.Footprint, optional
+        The telescope footprint to use for tiling; DECamConvexHull by default.
+    tiling_force_update : bool, optional
+        Whether to force update the tiling cache; False by default.
+    max_sep_cluster : astropy.coordinates.Angle, optional
+        The radius to use when clustering pointings, by default 1.0*u.arcmin
     scoring : str, optional
-        _description_, by default "probsum"
+        The scoring algorithm to use to rank pointings; 'probadd' by default.
+        Possible options are:
+        - 'probadd': Score by total probability added by each pointing, ignoring previously covered pixels.
+        - 'probden_probadd': Score by maximum probability density in each pointing, breaking ties by total probability added.
+    output_dir : str, optional
+        The output directory to save results; if not provided, uses the directory the skymap is in.
+
+    Raises
+    ------
+    NotImplementedError
+        If the scoring specified is not implemented.
     """
     # Load skymap
+    print("Loading skymap...")
     skymap_filename, sm = healpix.parse_skymap_args(skymap_filename, lvk_eventname)
     # Calculate contour regions
     # Flatten skymap
     sm_flat = lsm_moc.rasterize(sm)
-    # plot_skymap_with_contours(sm_flat, [50, 90])
+    # Get 90% contour regions
+    print("Calculating 90% contour regions...")
     r90s = healpix.get_skymap_contours_as_regions(sm_flat, [90])[0]
     # Load pointings
-    decam_tiling = decam.get_archival_tiling(force_update=False)
+    print("Loading DECam archival pointings...")
+    decam_tiling = decam.get_archival_tiling(force_update=tiling_force_update)
     # Get pointings within contours
+    print("Selecting pointings near 90% contour regions...")
     sc_tiling = SkyCoord(
         decam_tiling["ra"],
         decam_tiling["dec"],
@@ -84,7 +104,6 @@ def basic_painter(
         in_region_temp = r90.contains(sc_tiling, DUMMY_WCS)
         in_region = np.logical_or(in_region, in_region_temp)
     nearby_tiling = decam_tiling[in_region]
-    print(nearby_tiling)
     del decam_tiling
     # Cluster pointings
     nearby_tiling_skycoord = SkyCoord(
@@ -117,8 +136,15 @@ def basic_painter(
             nearby_coverage[f] = d2d <= max_sep_cluster
     # Cast to dataframe + clean
     nearby_coverage = pd.DataFrame(nearby_coverage)
+    print(
+        f"Found {nearby_coverage.shape[0]} clustered pointings near 90% contour regions:"
+    )
+    for f in decam.FILTERS:
+        n_pointings = nearby_coverage[f].sum()
+        print(f"\t{f}: {n_pointings} pointings")
     del nearby_tiling, nearby_tiling_skycoord, nearby_tiling_clustered_skycoord
     # Determine coverage of healpixs
+    print("Evaluating healpix coverage of pointings with footprint...")
     # Ends up as an [n_pointings x n_healpixels] array, true if that pointing covers the healpixel
     # Get ra/dec for skymap
     sm["RA"], sm["DEC"] = healpix.calc_radecs_for_skymap(sm)
@@ -147,6 +173,7 @@ def basic_painter(
     hpx_probs = healpix._get_probs_for_skymap(sm)
     # Iterate over filters
     # TODO: The algorithm works, but the output was sloppily put together right before bedtime, so definitely rethink that
+    print(f"Selecting obsplan by '{scoring}' scoring...")
     result = {}
     for f in decam.FILTERS:
         i_exps = []
@@ -155,12 +182,12 @@ def basic_painter(
         # Iterate until no more coverage is possible
         while True:
             # Calculate probability coverage using only non-covered pixels
-            exp_probs = score_by_probsum(hpx_probs_uncovered, in_footprint)
+            exp_probs = score_by_probadd(hpx_probs_uncovered, in_footprint)
             # Calculate score, mask by filter
-            if scoring == "probsum":
+            if scoring == "probadd":
                 scores = exp_probs
-            elif scoring == "probden_probsum":
-                scores = score_by_probden_probsum(hpx_probs_uncovered, in_footprint)
+            elif scoring == "probden_probadd":
+                scores = score_by_probden_probadd(hpx_probs_uncovered, in_footprint)
             else:
                 raise NotImplementedError(f"Scoring '{scoring}' not implemented.")
             scores *= nearby_coverage[f]

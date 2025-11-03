@@ -1,7 +1,10 @@
+# Plotting utilities
+
 import matplotlib.pyplot as plt
 
 from .healpix import calc_contours_for_skymap
 
+# Dictionary mapping filters to colors for plotting
 FILTER2COLOR = {
     "u": "xkcd:indigo",
     "g": "xkcd:bluegreen",

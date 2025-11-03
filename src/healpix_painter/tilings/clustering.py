@@ -4,23 +4,23 @@ from astropy.coordinates import SkyCoord, match_coordinates_sky
 
 
 def assign_groupids(coords, max_sep=1.0 * u.arcmin):
-    """Given a set of coordinates, assign groupids
+    """Given a set of coordinates, cluster by given radius,
     s.t. the members of each group are within `max_sep` of another member of the group.
 
     Parameters
     ----------
-    skycoords : _type_
-        _description_
-    max_sep : _type_, optional
-        _description_, by default 1.0*u.arcmin
+    skycoords : astropy.coordinates.SkyCoordj
+        Set of sky coordinates to cluster.
+    max_sep : astropy.coordinates.Angle, optional
+        Maximum separation between group member and closest neighbor, by default 1.0*u.arcmin
     """
     # Find nearest neighbors
     idx, d2d, _ = match_coordinates_sky(coords, coords, nthneighbor=2)
     # Get chains of neighbors (whose nearest neighbors are within the chain)
+    # Iterate over skycoords
     groupids = np.empty(len(coords))
     groupids[:] = np.nan
     groupid = 0
-    # Iterate over skycoords
     for i in np.arange(len(coords)):
         # If closer than max_sep
         if d2d[i] <= max_sep:
@@ -54,16 +54,16 @@ def assign_groupids(coords, max_sep=1.0 * u.arcmin):
 
 
 def cluster_once(coords, max_sep=1.0 * u.arcmin):
-    """Given a set of coordinates, perform one clustering reduction.
-    One clustering reduction finds the nearest neighbors and groups them into a single pointing
+    """Given a set of coordinates, perform one clustering iteration.
+    One clustering iteration finds the nearest neighbors and groups them into a single pointing
     if their separation is less than the threshold.
 
     Parameters
     ----------
-    skycoord : _type_
-        _description_
-    max_sep : _type_, optional
-        _description_, by default 1.0*u.arcmin
+    skycoords : astropy.coordinates.SkyCoordj
+        Set of sky coordinates to cluster.
+    max_sep : astropy.coordinates.Angle, optional
+        Maximum separation between group member and closest neighbor, by default 1.0*u.arcmin
     """
     # Find groupids
     groupids = assign_groupids(coords, max_sep=max_sep)
@@ -83,22 +83,29 @@ def cluster_once(coords, max_sep=1.0 * u.arcmin):
     return SkyCoord(outcoords)
 
 
-def cluster_skycoord(coords, max_sep=1.0 * u.arcmin):
+def cluster_skycoord(coords, max_sep=1.0 * u.arcmin, max_iters=100):
     """Given a set of sky coordinates,
     cluster them s.t. the members of each cluster is within `max_sep` of another member of the cluster.
 
     Parameters
     ----------
-    skycoords : _type_
-        _description_
-    max_sep : _type_, optional
-        _description_, by default 1.0*u.arcmin
+    skycoords : astropy.coordinates.SkyCoordj
+        Set of sky coordinates to cluster.
+    max_sep : astropy.coordinates.Angle, optional
+        Maximum separation between group member and closest neighbor, by default 1.0*u.arcmin
     """
     # Loop until no change occurs
     outcoords_old = []
     outcoords_new = coords.copy()
+    iters = 0
     while len(outcoords_old) != len(outcoords_new):
-        print(len(outcoords_old), len(outcoords_new))
         outcoords_old = outcoords_new.copy()
         outcoords_new = cluster_once(outcoords_new, max_sep=max_sep)
+        max_iters += 1
+        # Break if max iters reached
+        if iters >= max_iters:
+            print(
+                f"Warning: maximum iterations {max_iters} reached in cluster_skycoord."
+            )
+            break
     return outcoords_new
