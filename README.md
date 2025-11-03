@@ -15,7 +15,7 @@ This package aims to produce an easily-digested summary of the options available
 
 ## Installation
 
-`healpix-painter` may be installed with `pip`:
+`healpix-painter` may be installed with `pip` (`python` 3.12 recommended):
 
 ```bash
 $ pip install healpix-painter
@@ -91,6 +91,15 @@ Instead of specifying the path to a skymap file, `healpix-painter` may be prompt
 
 ```bash
 --lvk-eventname SYYMMDDaa
+```
+
+### I want to use a different ranking algorithm for selecting pointings
+
+The default ranking algorithm scores the available pointings based on how much *new* probability they cover, that is, how much probability they cover that hasn't been covered by a previous pointing.
+The only other algorithm available at this time ranks pointings first by the maximum probability density contained in the footprint, breaking ties by the total new probabilty in the footprint; this mode can be enabled with
+
+```bash
+--scoring probden_probadd
 ```
 
 ### I want to update the cached list of DECam pointings
