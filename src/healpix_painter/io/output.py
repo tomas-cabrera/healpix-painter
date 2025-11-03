@@ -88,9 +88,15 @@ def package_results(
                 filter_data.iloc[i]["ra"], filter_data.iloc[i]["dec"]
             )
             for fpccd in fpc:
+                x = fpccd[0]
+                y = fpccd[1]
+                # Close the polygon
+                if x[0] != x[-1] or y[0] != y[-1]:
+                    x = np.append(x, x[0])
+                    y = np.append(y, y[0])
                 plt.plot(
-                    fpccd[0],
-                    fpccd[1],
+                    x,
+                    y,
                     color=FILTER2COLOR.get(f),
                     alpha=alpha[i],
                     lw=lw[i],
