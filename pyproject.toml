@@ -18,6 +18,9 @@ dependencies = [
     "typer>=0.16.0",
 ]
 
+[project.urls]
+"Source Code" = "https://github.com/tomas-cabrera/healpix-painter"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
