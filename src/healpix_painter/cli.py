@@ -1,8 +1,8 @@
 import typer
 from typing_extensions import Annotated
 
+from healpix_painter import telescopes
 from healpix_painter.basicpainter import basic_painter
-from healpix_painter import footprints
 
 
 def healpix_painter(
@@ -77,7 +77,7 @@ def healpix_painter(
         basic_painter(
             skymap_filename=skymap_filename,
             lvk_eventname=lvk_eventname,
-            footprint=getattr(footprints, footprint),
+            footprint=telescopes.FOOTPRINT_REGISTRY[footprint],
             tiling_force_update=tiling_force_update,
             scoring=scoring,
             output_dir=output_dir,

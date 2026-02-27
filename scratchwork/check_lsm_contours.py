@@ -3,7 +3,7 @@ from healpix_painter import healpix
 from astropy.table import Table
 import os.path as pa
 import matplotlib.pyplot as plt
-import jax.numpy as jnp
+import numpy as np
 from astropy.coordinates import SkyCoord
 
 # Load skymap
@@ -20,7 +20,7 @@ cs = healpix.calc_contours_for_skymap(sm_moc_tab, contours=cs_keys)
 # Plot contours
 for k, c in zip(cs_keys, cs):
     for cii, ci in enumerate(c):
-        ci = jnp.array(ci)
+        ci = np.array(ci)
         plt.plot(ci[:, 0], ci[:, 1], label=f"Contour {k}:{cii}")
 plt.legend()
 plt.show()

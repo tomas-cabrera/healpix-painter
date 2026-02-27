@@ -5,9 +5,10 @@ import pandas as pd
 from astropy.coordinates import SkyCoord, match_coordinates_sky
 
 from healpix_painter import healpix
-from healpix_painter.footprints import DUMMY_WCS, DECamConvexHull
+from healpix_painter.footprints import DUMMY_WCS
 from healpix_painter.io.output import package_results
-from healpix_painter.tilings import decam
+from healpix_painter.telescopes import decam
+from healpix_painter.telescopes.decam import DECamConvexHull
 from healpix_painter.tilings.clustering import cluster_skycoord
 
 

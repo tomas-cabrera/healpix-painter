@@ -1,11 +1,11 @@
 import os.path as pa
 
 import astropy.units as u
-import jax.numpy as jnp
 import numpy as np
 from astropy.coordinates import SkyCoord
 from astropy.wcs import WCS
 from regions import PolygonSkyRegion, Regions
+from scipy.spatial import ConvexHull
 
 import healpix_painter
 
@@ -62,7 +62,7 @@ class Footprint:
             self.region_coords = self.region_coords_from_regions()
         elif region_coords is not None and regions_file is None:
             # region_coords is an n_regions x 2 x n_vertices_per_region array
-            self.region_coords = jnp.array(region_coords)
+            self.region_coords = np.array(region_coords)
             self.regions = self.regions_from_region_coords()
         else:
             raise ValueError("Either region_file or region_coords must be provided.")
@@ -77,9 +77,9 @@ class Footprint:
         """
         if regions is None:
             regions = self.regions
-        region_coords = jnp.einsum(
+        region_coords = np.einsum(
             "ijk->jik",
-            jnp.array(
+            np.array(
                 [
                     [r.vertices.ra.deg for r in regions],
                     [r.vertices.dec.deg for r in regions],
@@ -112,15 +112,15 @@ class Footprint:
     def _footprint_in_cartesian(self):
         # Get the RA and DEC trig values as independent arrays in radians
         _ra, _dec = (
-            self.region_coords[:, 0, :] * jnp.pi / 180,
-            self.region_coords[:, 1, :] * jnp.pi / 180,
+            self.region_coords[:, 0, :] * np.pi / 180,
+            self.region_coords[:, 1, :] * np.pi / 180,
         )
-        _rasin, _racos = jnp.sin(_ra), jnp.cos(_ra)
-        _decsin, _deccos = jnp.sin(_dec), jnp.cos(_dec)
+        _rasin, _racos = np.sin(_ra), np.cos(_ra)
+        _decsin, _deccos = np.sin(_dec), np.cos(_dec)
         # Convert to cartesian coordinates
-        _r = jnp.einsum(
+        _r = np.einsum(
             "ijk->jik",
-            jnp.array(
+            np.array(
                 [
                     _racos * _deccos,  # x
                     _rasin * _deccos,  # y
@@ -135,20 +135,20 @@ class Footprint:
         _x, _y, _z = r_cartesian[:, 0, :], r_cartesian[:, 1, :], r_cartesian[:, 2, :]
         # Convert to spherical coordinates in degrees
         _r = (
-            jnp.einsum(
+            np.einsum(
                 "ijk->jik",
-                jnp.array(
+                np.array(
                     [
-                        jnp.arctan2(_y, _x)
+                        np.arctan2(_y, _x)
                         + (
-                            2 * jnp.pi * (_y < 0)
+                            2 * np.pi * (_y < 0)
                         ),  # RA (latter half ensures positive values)
-                        jnp.arctan2(_z, jnp.sqrt(_x**2 + _y**2)),  # DEC
+                        np.arctan2(_z, np.sqrt(_x**2 + _y**2)),  # DEC
                     ]
                 ),
             )
             * 180
-            / jnp.pi
+            / np.pi
         )
         return _r
 
@@ -156,27 +156,27 @@ class Footprint:
         # Calculate the rotation matrix;
         #   apply dec before ra so that the dec rotation is simply around the negative y-axis.
         #   TODO: add roll, as a rotation about (+/-)x-axis before the ra and dec rotations
-        sinra, cosra = jnp.sin(ra * jnp.pi / 180), jnp.cos(ra * jnp.pi / 180)
-        sindec, cosdec = jnp.sin(dec * jnp.pi / 180), jnp.cos(dec * jnp.pi / 180)
-        ra_matrix = jnp.array(
+        sinra, cosra = np.sin(ra * np.pi / 180), np.cos(ra * np.pi / 180)
+        sindec, cosdec = np.sin(dec * np.pi / 180), np.cos(dec * np.pi / 180)
+        ra_matrix = np.array(
             [
                 [cosra, -sinra, 0],
                 [sinra, cosra, 0],
                 [0, 0, 1],
             ]
         )
-        dec_matrix = jnp.array(
+        dec_matrix = np.array(
             [
                 [cosdec, 0, -sindec],
                 [0, 1, 0],
                 [sindec, 0, cosdec],
             ]
         )
-        rotation_matrix = jnp.linalg.multi_dot([ra_matrix, dec_matrix])
+        rotation_matrix = np.linalg.multi_dot([ra_matrix, dec_matrix])
         # Convert footprint to cartesian
         region_coords_cartesian = self._footprint_in_cartesian()
         # Apply rotation matrix
-        region_coords_cartesian_rotated = jnp.einsum(
+        region_coords_cartesian_rotated = np.einsum(
             "ij,kjl->kil",
             rotation_matrix,
             region_coords_cartesian,
@@ -199,7 +199,7 @@ class Footprint:
 
         Returns
         -------
-        jnp.ndarray
+        np.ndarray
             The rotated region coordinates, as an n_regions x 2 x n_vertices_per_region array.
 
         Raises
@@ -253,12 +253,134 @@ class Footprint:
         return obj_in_footprint
 
 
-DECamFootprint = Footprint(
-    regions_file=f"{pa.dirname(healpix_painter.__file__)}/data/footprints/decam.crtf",
-    mount="equatorial",
-)
+def make_footprint_crtf(
+    centra,
+    centdec,
+    cornras,
+    corndecs,
+    output_path=None,
+    convexhull=False,
+):
+    """Function to convert coordinates from a sample exposure into a CRTF file representing the footprint.
+    The required information is the ra/dec of the exposure itself, and the coordinates of the individual CCDs.
+    cornras[i][j] should represent the ra of the jth corner of the ith CCD, and similarly for corndecs.
+    Also has option to save convexhull of footprint for more lightweight operations.
 
-DECamConvexHull = Footprint(
-    regions_file=f"{pa.dirname(healpix_painter.__file__)}/data/footprints/decam_convexhull.crtf",
-    mount="equatorial",
-)
+    :param centra: Central RA of the footprint
+    :type centra: float
+    :param centdec: Central Dec of the footprint
+    :type centdec: float
+    :param cornras: Corner RAs of the footprint
+    :type cornras: array-like
+    :param corndecs: Corner Decs of the footprint
+    :type corndecs: array-like
+    :param output_path: Path to save the CRTF file, defaults to None
+    :type output_path: str, optional
+    :param convexhull: Save the convex hull of the footprint, defaults to False
+    :type convexhull: bool, optional
+    :return: None
+    :rtype: None
+    """
+    # Rotate coords to frame centered on (0,0)
+    # Same as footprints.Footprint._rotate_equatorial, but in reverse
+    # Rotation matrix
+    sinra, cosra = np.sin(centra * np.pi / 180), np.cos(centra * np.pi / 180)
+    sindec, cosdec = np.sin(centdec * np.pi / 180), np.cos(centdec * np.pi / 180)
+    ra_matrix = np.array(
+        [
+            [cosra, sinra, 0],
+            [-sinra, cosra, 0],
+            [0, 0, 1],
+        ]
+    )
+    dec_matrix = np.array(
+        [
+            [cosdec, 0, sindec],
+            [0, 1, 0],
+            [-sindec, 0, cosdec],
+        ]
+    )
+    rotation_matrix = np.linalg.multi_dot([dec_matrix, ra_matrix])
+    # Flatten ras and decs for matrix multiplication
+    ras_np = np.array(cornras)
+    decs_np = np.array(corndecs)
+    ras_shape = ras_np.shape
+    decs_shape = decs_np.shape
+    ras_flat = ras_np.reshape(-1)
+    decs_flat = decs_np.reshape(-1)
+    # Convert to cartesian coordinates
+    sinras_flat, cosras_flat = (
+        np.sin(ras_flat * np.pi / 180),
+        np.cos(ras_flat * np.pi / 180),
+    )
+    sindecs_flat, cosdecs_flat = (
+        np.sin(decs_flat * np.pi / 180),
+        np.cos(decs_flat * np.pi / 180),
+    )
+    r_cartesian_flat = np.array(
+        [
+            cosras_flat * cosdecs_flat,  # x
+            sinras_flat * cosdecs_flat,  # y
+            sindecs_flat,  # z
+        ]
+    )
+    # Apply rotation matrix
+    r_cartesian_flat_rotated = np.einsum(
+        "ij,jk->ik",
+        rotation_matrix,
+        r_cartesian_flat,
+    )
+    # Convert to ra/dec
+    x_flat_rotated = r_cartesian_flat_rotated[0, :]
+    y_flat_rotated = r_cartesian_flat_rotated[1, :]
+    z_flat_rotated = r_cartesian_flat_rotated[2, :]
+    ras_rotated_flat = (
+        (
+            np.arctan2(y_flat_rotated, x_flat_rotated)
+            + (2 * np.pi * (y_flat_rotated < 0))
+        )
+        * 180
+        / np.pi
+    )
+    decs_rotated_flat = (
+        np.arctan2(z_flat_rotated, np.sqrt(x_flat_rotated**2 + y_flat_rotated**2))
+        * 180
+        / np.pi
+    )
+
+    # If convexhull, get the convex hull of the footprint
+    if convexhull:
+        # Modification to ras avoids having to deal with meridian
+        # TODO: Make this smarter by checking if the footprint crosses the meridian first
+        hull = ConvexHull(
+            np.array([(ras_rotated_flat + 180) % 360, decs_rotated_flat]).T
+        )
+        ras_hull = ras_rotated_flat[hull.vertices]
+        decs_hull = decs_rotated_flat[hull.vertices]
+
+        # Format for footprint
+        footprint_coords = np.array([[ras_hull, decs_hull]])
+    # Else keep all details
+    else:
+        # Reshape back to original shape
+        cornras_rotated = ras_rotated_flat.reshape(ras_shape)
+        corndecs_rotated = decs_rotated_flat.reshape(decs_shape)
+        # Format for footprint
+        footprint_coords = np.array(
+            [
+                [cornras_rotated[i, :], corndecs_rotated[i, :]]
+                for i in range(len(cornras_rotated))
+            ]
+        )
+
+    # Cast as footprint
+    footprint = Footprint(region_coords=footprint_coords)
+
+    # Save to CRTF file
+    if output_path is None:
+        output_path = (
+            f"{pa.dirname(healpix_painter.__file__)}/data/footprints/footprint.crtf"
+        )
+    footprint.regions.write(output_path, overwrite=True)
+
+    return output_path, footprint

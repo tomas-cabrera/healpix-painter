@@ -1,10 +1,10 @@
 import os
 import os.path as pa
+from glob import glob
 from urllib.request import urlretrieve
 
 import astropy.units as u
 import astropy_healpix as ah
-import jax.numpy as jnp
 import ligo.skymap.moc as lsm_moc
 import lxml.etree
 import numpy as np
@@ -18,7 +18,12 @@ from regions import PolygonSkyRegion, Regions
 import healpix_painter
 
 
-def parse_skymap_args(skymap_filename=None, lvk_eventname=None):
+def parse_skymap_args(
+    skymap_filename=None,
+    lvk_eventname=None,
+    force_update=False,
+    verbose=False,
+):
     """Returns skymap as astropy table.
     GraceDb interaction mostly cribbed from gwemopt.io.skymap
 
@@ -50,38 +55,51 @@ def parse_skymap_args(skymap_filename=None, lvk_eventname=None):
     elif skymap_filename is not None:
         pass
     elif lvk_eventname is not None:
-        print(f"Fetching skymap for {lvk_eventname} from GraceDb...")
-        # Initialize client
-        client = GraceDb()
-        # Get latest VOEvent info
-        latest_voevent = client.voevents(lvk_eventname).json()["voevents"][-1]
-        # Get latest skymap url from lxml info
-        response = requests.get(latest_voevent["links"]["file"], timeout=60)
-        root = lxml.etree.fromstring(response.content)
-        params = {
-            elem.attrib["name"]: elem.attrib["value"]
-            for elem in root.iterfind(".//Param")
-        }
-        skymap_url = params["skymap_fits"]
-        # Make local path
-        skymap_filename = pa.join(
+        # Check for cached skymap
+        skymap_dir = pa.join(
             pa.dirname(healpix_painter.__file__),
             "data",
             "skymaps",
             ".cache",
             lvk_eventname,
-            pa.basename(skymap_url),
         )
-        # If file does not exist
-        if not pa.exists(skymap_filename):
-            # Make directories as needed
-            if not pa.exists(pa.dirname(skymap_filename)):
-                os.makedirs(pa.dirname(skymap_filename), exist_ok=True)
-            # Download file
-            print(f"Downloading skymap from {skymap_url} to {skymap_filename}...")
-            urlretrieve(skymap_url, skymap_filename)
+        globstr = pa.join(skymap_dir, "*.fits*")
+        cached_skymaps = glob(globstr)
+        if len(cached_skymaps) > 0 and not force_update:
+            skymap_filename = cached_skymaps[0]
+            if verbose:
+                print(f"Using cached skymap at {skymap_filename}...")
         else:
-            print(f"Using cached skymap at {skymap_filename}...")
+            if verbose:
+                print(f"Fetching skymap for {lvk_eventname} from GraceDb...")
+            # Initialize client
+            client = GraceDb()
+            # Get latest VOEvent info
+            latest_voevent = client.voevents(lvk_eventname).json()["voevents"][-1]
+            # Get latest skymap url from lxml info
+            response = requests.get(latest_voevent["links"]["file"], timeout=60)
+            root = lxml.etree.fromstring(response.content)
+            params = {
+                elem.attrib["name"]: elem.attrib["value"]
+                for elem in root.iterfind(".//Param")
+            }
+            skymap_url = params["skymap_fits"]
+            # Make local path
+            skymap_filename = pa.join(
+                skymap_dir,
+                pa.basename(skymap_url),
+            )
+            # If file does not exist
+            if not pa.exists(skymap_filename):
+                # Make directories as needed
+                if not pa.exists(pa.dirname(skymap_filename)):
+                    os.makedirs(pa.dirname(skymap_filename), exist_ok=True)
+                # Download file
+                if verbose:
+                    print(
+                        f"Downloading skymap from {skymap_url} to {skymap_filename}..."
+                    )
+                urlretrieve(skymap_url, skymap_filename)
     return skymap_filename, Table.read(skymap_filename)
 
 
@@ -119,7 +137,7 @@ def calc_radecs_for_skymap(skymap, flat_order="nested"):
     if "UNIQ" in skymap.columns:
         ra, dec = _uniq_to_lonlat(skymap["UNIQ"])
     else:
-        healpix_index = jnp.arange(len(skymap))
+        healpix_index = np.arange(len(skymap))
         nside = ah.npix_to_nside(len(skymap))
         ra, dec = ah.healpix_to_lonlat(healpix_index, nside, order=flat_order)
     return ra.to(u.deg), dec.to(u.deg)
