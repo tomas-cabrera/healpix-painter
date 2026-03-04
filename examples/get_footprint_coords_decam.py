@@ -21,7 +21,7 @@ fits_path = f"{cache_dir}/c4d_231130_004704_ooi_g_v1.fits.fits"
 if not pa.exists(fits_path):
     urlretrieve(fits_url, fits_path)
 
-# Get central RA, DEC
+# Get coordinates from header
 with fits.open(fits_path) as hdul:
     # Get number of extensions
     n_ext = len(hdul)
