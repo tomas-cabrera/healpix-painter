@@ -1,11 +1,9 @@
 import astropy.units as u
-import ligo.skymap.moc as lsm_moc
 import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord, match_coordinates_sky
 
 from healpix_painter import healpix
-from healpix_painter.footprints import DUMMY_WCS
 from healpix_painter.io.output import package_results
 from healpix_painter.telescopes import decam
 from healpix_painter.telescopes.decam import DECamConvexHull
@@ -82,30 +80,28 @@ def basic_painter(
     # Load skymap
     print("Loading skymap...")
     skymap_filename, sm = healpix.parse_skymap_args(skymap_filename, lvk_eventname)
-    # Calculate contour regions
-    # Flatten skymap
-    sm_flat = lsm_moc.rasterize(sm)
-    # Get 90% contour regions
-    print("Calculating 90% contour regions...")
-    r90s = healpix.get_skymap_contours_as_regions(sm_flat, [90])[0]
     # Load pointings
     print("Loading DECam archival pointings...")
     decam_tiling = decam.get_archival_tiling(force_update=tiling_force_update)
-    # Get pointings within contours
-    print("Selecting pointings near 90% contour regions...")
     sc_tiling = SkyCoord(
         decam_tiling["ra"],
         decam_tiling["dec"],
         unit=u.deg,
     )
-    # TODO: Back of the envelope calculation shows that 12 hours / (60+30)s * 3 sq. deg. = 1440 square degrees of coverage.
-    #       Based on this, choosing the hpx area to get pointings for should cut off at ~1500 square degrees, or 95%, whichever is smaller
-    in_region = [False] * decam_tiling.shape[0]
-    for r90 in r90s:
-        in_region_temp = r90.contains(sc_tiling, DUMMY_WCS)
-        in_region = np.logical_or(in_region, in_region_temp)
+
+    # Get pointings within contours
+    print("Selecting pointings near 90% contour regions...")
+    # # TODO: Back of the envelope calculation shows that 12 hours / (60+30)s * 3 sq. deg. = 1440 square degrees of coverage.
+    # #       Based on this, choosing the hpx area to get pointings for should cut off at ~1500 square degrees, or 95%, whichever is smaller
+    in_region = healpix.mask_pointings_in_skymap(
+        skymap_filename,
+        sc_tiling,
+        ci=90,
+        max_order=11,
+    )
     nearby_tiling = decam_tiling[in_region]
-    del decam_tiling
+    del decam_tiling, sc_tiling
+
     # Cluster pointings
     nearby_tiling_skycoord = SkyCoord(
         nearby_tiling["ra"],
@@ -116,6 +112,7 @@ def basic_painter(
         nearby_tiling_skycoord,
         max_sep=max_sep_cluster,
     )
+
     # Determine coverage of clustered pointings
     nearby_coverage = {
         "ra": nearby_tiling_clustered_skycoord.ra.to(u.deg),
