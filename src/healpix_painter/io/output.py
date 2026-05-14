@@ -5,7 +5,7 @@ import shutil
 import matplotlib.pyplot as plt
 import numpy as np
 
-from healpix_painter.plotting import FILTER2COLOR
+from healpix_painter.io.plotting import FILTER2COLOR
 
 
 # Output results

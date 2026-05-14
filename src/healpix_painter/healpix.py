@@ -23,7 +23,7 @@ def parse_skymap_args(
     lvk_eventname=None,
     force_update=False,
     verbose=False,
-):
+) -> tuple[str, Table]:
     """Returns skymap as astropy table.
     GraceDb interaction mostly cribbed from gwemopt.io.skymap
 
@@ -111,12 +111,24 @@ def _uniq_to_lonlat(uniq):
 
 
 def _get_probs_for_skymap(skymap):
-    try:
-        areas = lsm_moc.uniq2pixarea(skymap["UNIQ"])
-    except ValueError:
-        areas = 4 * np.pi / skymap.shape[0]
-    probs = skymap["PROBDENSITY"] * areas
-    return probs
+    # Get column names
+    if isinstance(skymap, Table):
+        cols = skymap.columns
+    elif isinstance(skymap, np.ndarray):
+        cols = skymap.dtype.names
+    else:
+        raise ValueError("Skymap must be an astropy Table or a numpy structured array.")
+    # Get probs
+    if "PROB" in cols:
+        return skymap["PROB"]
+    elif "PROBDENSITY" in cols:
+        if "UNIQ" in cols:
+            areas = lsm_moc.uniq2pixarea(skymap["UNIQ"])
+        else:
+            areas = 4 * np.pi / len(skymap)
+        return skymap["PROBDENSITY"] * areas
+    else:
+        raise ValueError("Skymap must have either 'PROB' or 'PROBDENSITY' column.")
 
 
 def calc_radecs_for_skymap(skymap, flat_order="nested"):
@@ -216,7 +228,6 @@ def mask_pointings_in_skymap(
 def find_exposures_for_skymap(
     skymap_path: str,
     df_pointings,
-    dt_followup=(3 * 365) * u.day,
     ci=90,
     max_order=11,
     verbose=False,
@@ -231,22 +242,6 @@ def find_exposures_for_skymap(
     if verbose:
         print(sum(in_region), "exposures in contour region")
 
-    # # Get exposures after event
-    # skymap_header = fits.getheader(skymap_path, ext=1)
-    # t_event = Time(skymap_header["DATE-OBS"], format="isot")
-    # t_exposure = Time(
-    #     list(df_pointings["caldat"].apply(lambda x: f"{x}T00:00:00").values),
-    #     format="isot",
-    # )
-    # dt_exposure = t_exposure - t_event
-    # after_event = dt_exposure > 0 * u.day
-    # within_dt = dt_exposure < dt_followup
-    # good_time = np.logical_and(after_event, within_dt)
-    # if verbose:
-    #     print(sum(good_time), "exposures in follow-up time window")
-
-    # Get exposures in contour region and after event
-    # in_followup = np.logical_and(in_region, good_time)
     if verbose:
         print(sum(in_region), "exposures in follow-up")
     return in_region
