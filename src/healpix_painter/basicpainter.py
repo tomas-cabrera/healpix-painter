@@ -48,7 +48,7 @@ def basic_painter(
     output_dir=None,
 ):
     """Tile the skymap using the given footprint and the given scoring algorithm.
-    Currently uses DECam archival pointings.
+    Currently uses archival DECam pointings.
 
     Parameters
     ----------
@@ -56,19 +56,19 @@ def basic_painter(
         The path to the HEALPix skymap to tile.
         Either skymap_filename or lvk_eventname must be provided.
     lvk_eventname : str, optional
-        The LVK event id to tile
+        The LVK event id to tile.
         Either skymap_filename or lvk_eventname must be provided.
     footprint : healpix_painter.footprints.Footprint, optional
         The telescope footprint to use for tiling; DECamConvexHull by default.
     tiling_force_update : bool, optional
         Whether to force update the tiling cache; False by default.
     max_sep_cluster : astropy.coordinates.Angle, optional
-        The radius to use when clustering pointings, by default 1.0*u.arcmin
-    scoring : str, optional
-        The scoring algorithm to use to rank pointings; 'probadd' by default.
+        The radius to use when clustering pointings, by default 1 arcmin.
+    scoring : str, optional, default 'probadd'
+        The scoring algorithm to use to rank pointings.
         Possible options are:
-        - 'probadd': Score by total probability added by each pointing, ignoring previously covered pixels.
-        - 'probden_probadd': Score by maximum probability density in each pointing, breaking ties by total probability added.
+            - 'probadd': Score by total probability added by each pointing, ignoring previously covered pixels.
+            - 'probden_probadd': Score by maximum probability density in each pointing, breaking ties by total probability added.
     output_dir : str, optional
         The output directory to save results; if not provided, uses the directory the skymap is in.
 
@@ -77,6 +77,7 @@ def basic_painter(
     NotImplementedError
         If the scoring specified is not implemented.
     """
+
     # Load skymap
     print("Loading skymap...")
     skymap_filename, sm = healpix.parse_skymap_args(skymap_filename, lvk_eventname)
