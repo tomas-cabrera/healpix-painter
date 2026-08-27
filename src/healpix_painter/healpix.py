@@ -155,15 +155,21 @@ def calc_radecs_for_skymap(skymap, flat_order="nested"):
     return ra.to(u.deg), dec.to(u.deg)
 
 
-def calc_contours_for_skymap(skymap_flat, contours):
+def calc_credible_levels_for_skymap(skymap):
     # Get probs
-    probs = _get_probs_for_skymap(skymap_flat)
+    probs = _get_probs_for_skymap(skymap)
 
     # Find credible levels
     i = np.flipud(np.argsort(probs))
     cumsum = np.cumsum(probs[i])
     cls = np.empty_like(probs)
     cls[i] = cumsum * 100
+
+    return cls
+
+
+def calc_contours_for_skymap(skymap_flat, contours):
+    cls = calc_credible_levels_for_skymap(skymap_flat)
 
     # Generate contours
     # Indexing scheme is paths[CI%][mode][vertex][ra,dec]

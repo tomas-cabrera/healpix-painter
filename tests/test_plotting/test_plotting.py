@@ -41,7 +41,9 @@ def test_plot_skymap_gradient_mollweide():
     ax.grid()
     # Plot
     plotting.plot_skymap_gradient(ax, S230922g_skymap_filename)
-    plt.savefig("test_plot_skymap_gradient_mollweide.png")
+    plt.savefig(
+        pa.join(pa.dirname(__file__), "test_plot_skymap_gradient_mollweide.png")
+    )
     plt.close()
     assert True
 
@@ -52,7 +54,9 @@ def test_plot_skymap_contours_mollweide():
     ax.grid()
     # Plot
     plotting.plot_skymap_contours(ax, S230922g_skymap_filename)
-    plt.savefig("test_plot_skymap_contours_mollweide.png")
+    plt.savefig(
+        pa.join(pa.dirname(__file__), "test_plot_skymap_contours_mollweide.png")
+    )
     plt.close()
     assert True
 
@@ -67,7 +71,7 @@ def test_plot_skymap_gradient_zoom():
     ax.grid()
     # Plot
     plotting.plot_skymap_gradient(ax, S230922g_skymap_filename)
-    plt.savefig("test_plot_skymap_gradient_zoom.png")
+    plt.savefig(pa.join(pa.dirname(__file__), "test_plot_skymap_gradient_zoom.png"))
     plt.close()
     assert True
 
@@ -82,7 +86,7 @@ def test_plot_skymap_contours_zoom():
     ax.grid()
     # Plot
     plotting.plot_skymap_contours(ax, S230922g_skymap_filename)
-    plt.savefig("test_plot_skymap_contours_zoom.png")
+    plt.savefig(pa.join(pa.dirname(__file__), "test_plot_skymap_contours_zoom.png"))
     plt.close()
     assert True
 
@@ -117,7 +121,11 @@ def test_plot_skymap_gradient_mollweide_coverage():
         ZTFFootprint,
         scs_ztf,
     )
-    plt.savefig("test_plot_skymap_gradient_mollweide_coverage.png")
+    plt.savefig(
+        pa.join(
+            pa.dirname(__file__), "test_plot_skymap_gradient_mollweide_coverage.png"
+        )
+    )
     plt.close()
     assert True
 
@@ -156,7 +164,9 @@ def test_plot_skymap_gradient_zoom_coverage():
         ZTFFootprint,
         scs_ztf,
     )
-    plt.savefig("test_plot_skymap_gradient_zoom_coverage.png")
+    plt.savefig(
+        pa.join(pa.dirname(__file__), "test_plot_skymap_gradient_zoom_coverage.png")
+    )
     plt.close()
     assert True
 
