@@ -26,6 +26,20 @@ DECamConvexHull = Footprint(
 
 
 def get_full_archive(force_update=False):
+    """Download archival DECam exposure information, from the NOIRLab Astro Data Archive.
+    Subsequent calls will use the cached version unless `force_update` is set to True.
+
+    Parameters
+    ----------
+    force_update : bool, optional, default False
+        If True, forces a re-download of the archive data, even if a cached version exists.
+
+    Returns
+    -------
+    df : pandas.DataFrame
+        DataFrame containing the archival DECam exposure information.
+    """
+
     ARCHIVE_FULL_PATH = f"{TILING_DIR}/archive_full.csv"
     if pa.exists(ARCHIVE_FULL_PATH) and not force_update:
         df = pd.read_csv(ARCHIVE_FULL_PATH)
@@ -65,6 +79,22 @@ def get_full_archive(force_update=False):
 
 
 def get_archival_tiling(force_update=False):
+    """Returns preprocessed version of the DECam archive for tiling purposes.
+    Quality cuts applied, removing exposures with exposure times <30s(50s) for *g*-band (non-*g*-band) exposures,
+    and duplicates dropped.
+    Masks indicating which filters have coverage at each unique RA/Dec position are added.
+
+    Parameters
+    ----------
+    force_update : bool, optional, default False
+        If True, forces a re-download and reprocessing of the archive data, even if a cached version exists.
+
+    Returns
+    -------
+    df_byfilter : pandas.DataFrame
+        DataFrame containing the archival DECam exposure information, reduced to unique RA/Dec positions and filtered by quality cuts.
+    """
+
     ##############################
     ###     Fetch/load df      ###
     ##############################
@@ -85,6 +115,7 @@ def get_archival_tiling(force_update=False):
         df.drop(columns=["caldat"], inplace=True)
 
         # Reduce by filter
+        print(df["ifilter"].unique())
         df["ifilter"] = df["ifilter"].apply(lambda x: "NaN" if x is None else x[0])
         df = df[df["ifilter"].apply(lambda x: x in list("ugrizY"))]
 

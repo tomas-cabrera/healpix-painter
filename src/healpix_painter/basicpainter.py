@@ -2,6 +2,7 @@ import astropy.units as u
 import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord, match_coordinates_sky
+from joblib import Parallel, delayed
 
 from healpix_painter import healpix
 from healpix_painter.io.output import package_results
@@ -10,7 +11,32 @@ from healpix_painter.telescopes.decam import DECamConvexHull
 from healpix_painter.tilings.clustering import cluster_skycoord
 
 
+def _pointing_in_footprint(ra_exp, dec_exp, ra_obj, dec_obj, footprint):
+    """Wrapper of footprint.in_footprint; included for parallelization."""
+    return footprint.in_footprint(
+        ra_obj=ra_obj,
+        dec_obj=dec_obj,
+        ra_exp=ra_exp,
+        dec_exp=dec_exp,
+    )
+
+
 def score_by_probadd(hpx_probs, in_footprint):
+    """Return the total probability contained by each pointing.
+
+    Parameters
+    ----------
+    hpx_probs : np.ndarray
+        n_healpixels x 1 array of probabilities for each healpixel in the skymap.
+    in_footprint : np.ndarray
+        n_pointings x n_healpixels array indicating which healpixels are in each pointing's footprint.
+
+    Returns
+    -------
+    np.ndarray
+        n_pointings x 1 array of scores for each pointing.
+    """
+
     # Calculate probability coverage using only non-covered pixels
     exp_probs = (in_footprint * hpx_probs).sum(axis=1)
     # Return
@@ -18,6 +44,21 @@ def score_by_probadd(hpx_probs, in_footprint):
 
 
 def score_by_probden_probadd(hpx_probs, in_footprint):
+    """Return a score for each pointing based on the maximum probability density in each pointing, breaking ties by total probability added.
+
+    Parameters
+    ----------
+    hpx_probs : np.ndarray
+        n_healpixels x 1 array of probabilities for each healpixel in the skymap.
+    in_footprint : np.ndarray
+        n_pointings x n_healpixels array indicating which healpixels are in each pointing's
+
+    Returns
+    -------
+    np.ndarray
+        n_pointings x 1 array of scores for each pointing.
+    """
+
     # Mask hpx not in footprints
     footprint_hpx_probs = in_footprint * hpx_probs
     # Get maximum prob
@@ -46,9 +87,12 @@ def basic_painter(
     max_sep_cluster=1.0 * u.arcmin,
     scoring="probadd",
     output_dir=None,
+    n_jobs=-1,
 ):
-    """Tile the skymap using the given footprint and the given scoring algorithm.
-    Currently uses archival DECam pointings.
+    """Generate an observation plan for the skymap using the given footprint and tiling.
+    At each step, chooses the highest scoring pointing, and then removes the healpixels covered by that pointing from the skymap before proceeding.
+
+    Currently uses a tiling of archival DECam coverage from the NOIRLab AstroData Archive.
 
     Parameters
     ----------
@@ -64,14 +108,18 @@ def basic_painter(
         Whether to force update the tiling cache; False by default.
     max_sep_cluster : astropy.coordinates.Angle, optional
         The radius to use when clustering pointings, by default 1 arcmin.
-    scoring : str, optional, default 'probadd'
+    scoring : {'probadd', 'probden_probadd'}, default 'probadd'
         The scoring algorithm to use to rank pointings.
         Possible options are:
-            - 'probadd': Score by total probability added by each pointing, ignoring previously covered pixels.
-            - 'probden_probadd': Score by maximum probability density in each pointing, breaking ties by total probability added.
+
+            - ``'probadd'`` : Score by total probability added by each pointing, ignoring previously covered pixels.
+            - ``'probden_probadd'`` : Score by maximum probability density in each pointing, breaking ties by total probability added.
+
     output_dir : str, optional
         The output directory to save results; if not provided, uses the directory the skymap is in.
-
+    n_jobs : int, optional
+        Number of parallel workers to use when evaluating footprint coverage per pointing;
+        -1 (default) uses all available cores. See joblib.Parallel for details.
     Raises
     ------
     NotImplementedError
@@ -153,18 +201,15 @@ def basic_painter(
         unit="deg",
         frame="icrs",
     )
-    # Iterate over exposures
-    in_footprint = []
-    for _, pointing in nearby_coverage.iterrows():
-        # Find healpixs in footprint
-        in_pointing = footprint.in_footprint(
-            ra_obj=sc_sm.ra.to(u.deg).value,
-            dec_obj=sc_sm.dec.to(u.deg).value,
-            ra_exp=pointing["ra"],
-            dec_exp=pointing["dec"],
+    # Iterate over exposures (in parallel: each pointing's footprint check is independent)
+    ra_obj = sc_sm.ra.to(u.deg).value
+    dec_obj = sc_sm.dec.to(u.deg).value
+    in_footprint = Parallel(n_jobs=n_jobs)(
+        delayed(_pointing_in_footprint)(
+            pointing.ra, pointing.dec, ra_obj, dec_obj, footprint
         )
-        # Append
-        in_footprint.append(in_pointing)
+        for pointing in nearby_coverage.itertuples()
+    )
     # Cast as array
     in_footprint = np.array(in_footprint)
     # Select pointings

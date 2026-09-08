@@ -8,12 +8,14 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "joblib>=1.5.3",
     "ligo-skymap>=2.2.2",
     "lxml>=6.0.2",
     "pandas>=2.3.0",
     "parmap>=1.7.0",
     "pytest>=8.3.5",
     "regions>=0.10",
+    "sphinxcontrib-typer>=0.10.0",
     "typer>=0.16.0",
 ]
 

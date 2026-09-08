@@ -6,6 +6,7 @@ from astropy.coordinates import SkyCoord
 from astropy.wcs import WCS
 from regions import PolygonSkyRegion, Regions
 from scipy.spatial import ConvexHull
+from typing import ClassVar
 
 import healpix_painter
 
@@ -21,42 +22,31 @@ DUMMY_WCS.wcs.set_pv([(2, 1, 45.0)])
 
 
 class Footprint:
-    """
-    A class to represent a footprint in the sky.
+    """A class to represent a focal plane footprint.
 
     Parameters
     ----------
-    region_coords : list-like
+    regions_file : str, optional, default None
+        Path to an astropy.regions.Regions file containing the footprint, by default None.
+        Either regions_file or region_coords must be provided.
+    region_coords : list-like, optional, default None
         A list-like containing the region coordinates.
         Each entry in the list should be a 2 x N array-like, where the first row contains the RA for the N region vertices,
         and the second row contains the DEC for the same (both in decimal degrees).
         For the time being we assume that all regions have the same number of vertices, to clean up some matrix operations.
+        Either regions_file or region_coords must be provided.
+    mount : str, optional, default "equatorial"
+        Telescope mount to use.
+
+    Raises
+    ------
+    ValueError
+        If neither regions_file nor region_coords are provided, or both are.
     """
 
-    _mounts_implemented = ["equatorial"]
+    _mounts_implemented: ClassVar[tuple[str, ...]] = ("equatorial",)
 
     def __init__(self, regions_file=None, region_coords=None, mount="equatorial"):
-        """_summary_
-
-        Parameters
-        ----------
-        regions_file : str, optional
-            Path to an astropy.regions.Regions file containing the footprint, by default None
-            Either regions_file or region_coords must be provided.
-        region_coords : list-like, optional
-            A list-like containing the region coordinates.
-            Each entry in the list should be a 2 x N array-like, where the first row contains the RA for the N region vertices,
-            and the second row contains the DEC for the same (both in decimal degrees).
-            For the time being we assume that all regions have the same number of vertices, to clean up some matrix operations.
-            Either regions_file or region_coords must be provided.
-        mount : str, optional
-            Telescope mount to use, by default "equatorial"
-
-        Raises
-        ------
-        ValueError
-            If neither regions_file nor region_coords are provided, or both are.
-        """
         if regions_file is not None and region_coords is None:
             self.regions = Regions.read(regions_file)
             self.region_coords = self.region_coords_from_regions()
@@ -72,9 +62,19 @@ class Footprint:
         )
 
     def region_coords_from_regions(self, regions=None):
+        """Convert the regions to their respective coordinates.
+
+        Parameters
+        ----------
+        regions : astropy.regions.Regions, optional, default None
+            The regions to convert; if None (default), uses self.regions.
+
+        Returns
+        -------
+        np.ndarray
+            An n_regions x (ra, dec) x n_vertices_per_region array of the region coordinates, in decimal degrees.
         """
-        Convert the regions to region coordinates.
-        """
+
         if regions is None:
             regions = self.regions
         region_coords = np.einsum(
@@ -89,9 +89,19 @@ class Footprint:
         return region_coords
 
     def regions_from_region_coords(self, region_coords=None):
+        """Convert the region coordinates to their respective regions.
+
+        Parameters
+        ----------
+        region_coords : np.ndarray, optional
+            An n_regions x (ra, dec) x n_vertices_per_region array of the region coordinates, in decimal degrees; if None (default), uses self.region_coords.
+
+        Returns
+        -------
+        astropy.regions.Regions
+            The regions corresponding to the given coordinates.
         """
-        Convert the region coordinates to regions.
-        """
+
         if region_coords is None:
             region_coords = self.region_coords
         regions = Regions(
@@ -192,9 +202,9 @@ class Footprint:
 
         Parameters
         ----------
-        ra : _type_
+        ra : np.ndarray
             Right ascension, in decimal degrees.
-        dec : _type_
+        dec : np.ndarray
             Declination, in decimal degrees
 
         Returns
@@ -207,6 +217,7 @@ class Footprint:
         NotImplementedError
             If the mount specified is not implemented.
         """
+
         if self.mount == "equatorial":
             return self._rotate_equatorial(ra, dec)
         else:
@@ -215,23 +226,26 @@ class Footprint:
             )
 
     def in_footprint(self, ra_obj, dec_obj, ra_exp=None, dec_exp=None):
-        """Returns true if the obj is in the footprint, false otherwise.
+        """Checks if the given coordinates are in the footprint.
+        If ``ra_exp`` and ``dec_exp`` are specified, the footprint is rotated to those coordinates before checking;
+        otherwise the footprint is assumed to be centered at (0, 0).
 
         Parameters
         ----------
-        ra_obj : _type_
+        ra_obj : float or np.ndarray
             RA of the object, in decimal degrees.
             Accepts arrays.
-        dec_obj : _type_
+        dec_obj : float or np.ndarray
             Dec of the object, in decimal degrees.
             Accepts arrays.
-        ra_exp : _type_, optional
+        ra_exp : float, optional, default None
             RA of the exposure, in decimal degrees, by default None.
-            If not none, dec_exp must be specified.
-        dec_exp : _type_, optional
+            If not None, ``dec_exp`` must be specified.
+        dec_exp : float, optional, default None
             Dec of the exposure, in decimal degrees, by default None
-            If not none, ra_exp must be specified.
+            If not None, ``ra_exp`` must be specified.
         """
+
         # Check exposure coords
         if ra_exp is not None and dec_exp is not None:
             pass
@@ -266,21 +280,29 @@ def make_footprint_crtf(
     cornras[i][j] should represent the ra of the jth corner of the ith CCD, and similarly for corndecs.
     Also has option to save convexhull of footprint for more lightweight operations.
 
-    :param centra: Central RA of the footprint
-    :type centra: float
-    :param centdec: Central Dec of the footprint
-    :type centdec: float
-    :param cornras: Corner RAs of the footprint
-    :type cornras: array-like
-    :param corndecs: Corner Decs of the footprint
-    :type corndecs: array-like
-    :param output_path: Path to save the CRTF file, defaults to None
-    :type output_path: str, optional
-    :param convexhull: Save the convex hull of the footprint, defaults to False
-    :type convexhull: bool, optional
-    :return: None
-    :rtype: None
+    Parameters
+    ----------
+    centra : float
+        Central RA of the footprint.
+    centdec : float
+        Central Dec of the footprint.
+    cornras : array-like
+        Corner RAs of the footprint.
+    corndecs : array-like
+        Corner Decs of the footprint.
+    output_path : str, optional, default None
+        Path to save the CRTF file.
+        If None (default), saves to the default path `healpix_painter/data/footprints/footprint.crtf`.
+    convexhull : bool, optional, default False
+        Convert to the convex hull of the footprint.
+        Useful for accelerating performance if the footprint is complex and the convex hull is a good approximation.
+
+    Returns
+    -------
+    tuple
+        Tuple containing the path to the CRTF file and the Footprint object
     """
+
     # Rotate coords to frame centered on (0,0)
     # Same as footprints.Footprint._rotate_equatorial, but in reverse
     # Rotation matrix

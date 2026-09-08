@@ -1,19 +1,16 @@
-{{ fullname | escape | underline }}
+{{ fullname | escape | underline}}
 
 .. currentmodule:: {{ module }}
 
 .. autoclass:: {{ objname }}
-   :members:
-   :show-inheritance:
-   :inherited-members:
 
    {% block methods %}
-   .. automethod:: __init__
 
    {% if methods %}
-   .. rubric:: Methods
+   .. rubric:: {{ _('Methods') }}
 
    .. autosummary::
+      :toctree:
    {% for item in methods %}
       ~{{ name }}.{{ item }}
    {%- endfor %}
@@ -22,7 +19,7 @@
 
    {% block attributes %}
    {% if attributes %}
-   .. rubric:: Attributes
+   .. rubric:: {{ _('Attributes') }}
 
    .. autosummary::
    {% for item in attributes %}

@@ -13,7 +13,7 @@ from astropy.coordinates import SkyCoord
 from astropy.table import Table
 from ligo.gracedb.rest import GraceDb
 from ligo.skymap import postprocess
-from regions import PolygonSkyRegion, Regions
+from regions import PixCoord, PolygonSkyRegion, Regions
 
 import healpix_painter
 
@@ -24,8 +24,7 @@ def parse_skymap_args(
     force_update=False,
     verbose=False,
 ) -> tuple[str, Table]:
-    """Returns skymap as astropy table.
-    GraceDb interaction mostly cribbed from gwemopt.io.skymap
+    """Loads skymap from given information, either a local filename or an LIGO/Virgo/KAGRA event name.
 
     Parameters
     ----------
@@ -33,12 +32,16 @@ def parse_skymap_args(
         The path to the HEALPix skymap to tile.
         Either skymap_filename or lvk_eventname must be provided.
     lvk_eventname : str, optional
-        The LVK event id to tile
+        The LVK event id to tile.
         Either skymap_filename or lvk_eventname must be provided.
+    force_update : bool, optional, default False
+        If True, forces a re-download of the skymap from GraceDb even if a cached version exists.
+    verbose : bool, optional, default False
+        If True, prints verbose output.
 
     Returns
     -------
-    str, astropy.table.Table
+    tuple[str, astroy.table.Table]
         The skymap filename and the skymap as an astropy table.
 
     Raises
@@ -46,6 +49,7 @@ def parse_skymap_args(
     ValueError
         If either skymap_filename or lvk_eventname are not provided, or both are.
     """
+
     if skymap_filename is None and lvk_eventname is None:
         raise ValueError("Either skymap_filename or lvk_eventname must be provided.")
     elif skymap_filename is not None and lvk_eventname is not None:
@@ -132,13 +136,13 @@ def _get_probs_for_skymap(skymap):
 
 
 def calc_radecs_for_skymap(skymap, flat_order="nested"):
-    """Using the UNIQ/HEALPix indexing, calculate the RA and DEC for each pixel in the skymap.
+    """Using the UNIQ/HEALPix indexing, calculate the RA and DEC for each pixel center in the skymap.
 
     Parameters
     ----------
     skymap : astropy.table.Table
         The skymap as an astropy table.
-    flat_order : str, optional
+    flat_order : str, optional, default 'nested'
         The indexing scheme of the flattened skymap; either 'nested' (default) or 'ring'.
 
     Returns
@@ -146,6 +150,7 @@ def calc_radecs_for_skymap(skymap, flat_order="nested"):
     np.ndarray, np.ndarray
         The RA and DEC arrays, in decimal degrees.
     """
+
     if "UNIQ" in skymap.columns:
         ra, dec = _uniq_to_lonlat(skymap["UNIQ"])
     else:
@@ -156,6 +161,19 @@ def calc_radecs_for_skymap(skymap, flat_order="nested"):
 
 
 def calc_credible_levels_for_skymap(skymap):
+    """Calculate the credible levels for each skymap pixel.
+
+    Parameters
+    ----------
+    skymap : astropy.table.Table
+        The skymap as an astropy table.
+
+    Returns
+    -------
+    np.ndarray
+        The credible levels for each pixel, in percent.
+    """
+
     # Get probs
     probs = _get_probs_for_skymap(skymap)
 
@@ -169,6 +187,21 @@ def calc_credible_levels_for_skymap(skymap):
 
 
 def calc_contours_for_skymap(skymap_flat, contours):
+    """Calculate the contours for the given skymap.
+
+    Parameters
+    ----------
+    skymap_flat : astropy.table.Table
+        The flattened skymap as an astropy table.
+    contours : tuple or list
+        The contour levels to calculate.
+
+    Returns
+    -------
+    np.ndarray
+        The contours for the given skymap, in the format expected by matplotlib.
+    """
+
     cls = calc_credible_levels_for_skymap(skymap_flat)
 
     # Generate contours
@@ -179,6 +212,21 @@ def calc_contours_for_skymap(skymap_flat, contours):
 
 
 def get_skymap_contours_as_regions(skymap_flat, contours):
+    """Convert the contours for the given skymap to regions.
+
+    Parameters
+    ----------
+    skymap_flat : astropy.table.Table
+        The flattened skymap as an astropy table.
+    contours : tuple or list
+        The contour levels to calculate.
+
+    Returns
+    -------
+    list of regions
+        The contours for the given skymap as regions.
+    """
+
     # Get contours
     cs = calc_contours_for_skymap(skymap_flat, contours)
     # Convert to regions
@@ -208,6 +256,27 @@ def mask_pointings_in_skymap(
     max_order=11,
     verbose=False,
 ):
+    """Given a list of pointings, return a mask on the list indicating which pointings lie in the specified 2D confidence interval.
+
+    Parameters
+    ----------
+    skymap_path : str
+        Path to the HEALPix skymap.
+    pointings : SkyCoord
+        The pointings to mask.
+    ci : int, optional, default 90
+        The confidence interval to use, by default 90.
+    max_order : int, optional, default 11
+        The maximum order to use for the skymap.
+    verbose : bool, optional, default False
+        If True, prints verbose output.
+
+    Returns
+    -------
+    np.ndarray
+        A boolean mask indicating which pointings lie in the specified confidence interval.
+    """
+
     # Get skymap
     _, skymap = parse_skymap_args(skymap_filename=skymap_path)
     # Flatten skymap, capping at max_order to avoid memory overflow
@@ -222,12 +291,13 @@ def mask_pointings_in_skymap(
     r90s = get_skymap_contours_as_regions(skymap_flat, [ci])[0]
 
     # Get coordinates in contour region
-    in_region = np.array([False] * len(pointings))
+    pixcoord = PixCoord.from_sky(pointings, healpix_painter.footprints.DUMMY_WCS)
+    in_region = np.zeros(len(pointings), dtype=bool)
     for r90 in r90s:
-        in_region_temp = r90.contains(pointings, healpix_painter.footprints.DUMMY_WCS)
-        in_region = np.logical_or(in_region, in_region_temp)
+        pixel_region = r90.to_pixel(healpix_painter.footprints.DUMMY_WCS)
+        in_region |= pixel_region.contains(pixcoord)
     if verbose:
-        print(sum(in_region), "exposures in follow-up")
+        print(sum(in_region), f"exposures in 2D {ci}% confidence interval")
     return in_region
 
 
@@ -238,6 +308,28 @@ def find_exposures_for_skymap(
     max_order=11,
     verbose=False,
 ):
+    """
+    Find the exposures in a given skymap that fall within a specified confidence interval.
+
+    Parameters
+    ----------
+    skymap_path : str
+        Path to the HEALPix skymap.
+    df_pointings : pandas.DataFrame-like
+        DataFrame containing the pointings to check.
+    ci : int, optional, default 90
+        The confidence interval to use.
+    max_order : int, optional, default 11
+        The maximum order to use for the skymap.
+    verbose : bool, optional, default False
+        If True, prints verbose output.
+
+    Returns
+    -------
+    np.ndarray
+        A boolean mask indicating which exposures fall within the specified confidence interval.
+    """
+
     # Get coordinates in contour region
     sc = SkyCoord(
         df_pointings["ra_center"],
@@ -246,10 +338,7 @@ def find_exposures_for_skymap(
     )
     in_region = mask_pointings_in_skymap(skymap_path, sc, ci, max_order)
     if verbose:
-        print(sum(in_region), "exposures in contour region")
-
-    if verbose:
-        print(sum(in_region), "exposures in follow-up")
+        print(sum(in_region), f"exposures in 2D {ci}% confidence interval")
     return in_region
 
 
@@ -257,15 +346,21 @@ def calc_skymap_coverage(skymap_path: str, pointings_list: list, footprints_list
     """Calculate the skymap probability covered by a set of pointings.
     Pointings for multiple telescopes may be passed.
 
-    :param skymap_path: The local path to a HEALPix skymap.
-    :type skymap_path: str
-    :param pointings_list: A list of length n_telescopes, where each element is a list of astropy.coordinates.SkyCoord objects representing the pointings for that telescope.
-    :type pointings_list: list
-    :param footprints_list: A list of length n_telescopes, where each element is a healpix_painter.Footprint object representing the footprint of that telescope.
-    :type footprints_list: list
-    :return: The total probability covered by the pointings, and a list of the probabilities covered by each telescope.
-    :rtype: float, list
+    Parameters
+    ----------
+    skymap_path : str
+        The local path to a HEALPix skymap.
+    pointings_list : list
+        A list of length n_telescopes, where each element is an astropy.coordinates.SkyCoord array representing the pointings for that telescope.
+    footprints_list : list
+        A list of length n_telescopes, where each element is a healpix_painter.Footprint object representing the footprint of that telescope.
+
+    Returns
+    -------
+    float, list
+        The total probability covered by all telescopes, and a list of the probabilities covered by each telescope.
     """
+
     # Get skymap
     _, skymap = parse_skymap_args(skymap_filename=skymap_path)
     # Get hpx probabilites
@@ -294,7 +389,7 @@ def calc_skymap_coverage(skymap_path: str, pointings_list: list, footprints_list
             in_footprint.append(in_pointing)
         # Reduce to mask of covered hpxs
         in_footprint = np.logical_or.reduce(in_footprint)
-        # Sum probabilities in pointings
+        # Append probability covered by this telescope
         prob_coverage.append(np.sum(hpx_probs[in_footprint]))
         # Append mask of hpxs covered by this telescope
         in_footprints.append(in_footprint)
