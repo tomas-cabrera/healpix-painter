@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-python@v5
       - name: Install dependencies
         run: |
-          pip install sphinx
+          pip install sphinx sphinxcontrib-typer
       - name: Sphinx build
         run: |
           sphinx-build doc/source doc/build
