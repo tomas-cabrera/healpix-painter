@@ -13,3 +13,5 @@ The remaining sections provide information on how to use individual components o
    
    quickstart
    coverage
+   plotting
+   telescopes
