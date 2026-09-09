@@ -1,3 +1,5 @@
+.. _quickstart:
+
 Quickstart
 ==========
 
@@ -52,7 +54,7 @@ The pointings are ordered in the file by the scoring metric used to select them;
 
 ``healpix-painter`` also generates several diagnostic plots.
 The first of these plots the cumulative probability covered as a function of the number of pointings in the observation plan (``cumprob_npointings.png``).
-This plot is intended to give a sense of the scale of resources required to cover the skymap:
+This plot is intended to give a sense of the scale of resources required to cover the skymap, and to assist the selection of a practical observation plan:
 
 .. image:: /_static/quickstart/cumprob_npointings.png
    :alt: Cumulative probability vs number of pointings plot
@@ -72,3 +74,5 @@ If the pointings cover a small enough area, zoomed-in plots are also generated (
    :alt: Zoomed-in skymap plot with available coverage
    :align: center
    :width: 80%
+
+Find additional details on running the observation planner at the :ref:`command line interface documentation <cli>`.

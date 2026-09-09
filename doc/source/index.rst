@@ -10,13 +10,13 @@ Add your content using ``reStructuredText`` syntax. See the
 `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
 documentation for details.
 
-Check out the :doc:`quickstart` section for further information, including how to :ref:`install <installation>` the project.
+For a brief tutorial, check out the :ref:`quickstart`, including how to :ref:`install <installation>` the project.
 
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   quickstart
+   user_guide/index
    cli
    api
