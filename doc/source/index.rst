@@ -3,12 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-healpix-painter documentation
-=============================
-
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+healpix-painter
+===============
 
 For a brief tutorial, check out the :ref:`quickstart`, including how to :ref:`install <installation>` the project.
 

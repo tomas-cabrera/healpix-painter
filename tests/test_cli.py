@@ -18,7 +18,7 @@ def test_cli_default():
             "./.cache/test_cli_default",
         ],
     )
-    assert result.exit_code == 0
+    assert result.exit_code == 0, f"{result.output} {result.stdout} {result.stderr}"
 
 
 def test_cli_update_tiling():

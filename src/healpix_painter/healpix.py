@@ -342,7 +342,11 @@ def find_exposures_for_skymap(
     return in_region
 
 
-def calc_skymap_coverage(skymap_path: str, pointings_list: list, footprints_list: list):
+def calc_skymap_coverage(
+    skymap_path,
+    pointings_list,
+    footprints_list,
+):
     """Calculate the skymap probability covered by a set of pointings.
     Pointings for multiple telescopes may be passed.
 
@@ -350,15 +354,19 @@ def calc_skymap_coverage(skymap_path: str, pointings_list: list, footprints_list
     ----------
     skymap_path : str
         The local path to a HEALPix skymap.
-    pointings_list : list
-        A list of length n_telescopes, where each element is an astropy.coordinates.SkyCoord array representing the pointings for that telescope.
-    footprints_list : list
-        A list of length n_telescopes, where each element is a healpix_painter.Footprint object representing the footprint of that telescope.
+    pointings_list : astropy.coordinates.SkyCoord or list
+        Pointing coordinates for one or more telescopes.
+        If a list is provided, each element should be an astropy.coordinates.SkyCoord array representing the pointings for that telescope.
+    footprints_list : healpix_painter.footprints.Footprint or list
+        The footprint(s) of the telescope(s).
+        If a list is provided, each element should be a healpix_painter.footprints.Footprint object representing the footprint of that telescope.
+        The length of footprints_list must match the length of pointings_list.
 
     Returns
     -------
-    float, list
-        The total probability covered by all telescopes, and a list of the probabilities covered by each telescope.
+    float(, list)
+        The total probability covered by all telescopes.
+        If multiple telescopes are provided, the function also returns a list of the probabilities covered by each telescope.
     """
 
     # Get skymap
@@ -369,6 +377,10 @@ def calc_skymap_coverage(skymap_path: str, pointings_list: list, footprints_list
     skymap["RA"], skymap["DEC"] = calc_radecs_for_skymap(skymap)
     sc_skymap = SkyCoord(skymap["RA"], skymap["DEC"], unit="deg")
     # Ensure pointings_list and footprints_list are the same length
+    if not isinstance(pointings_list, list):
+        pointings_list = [pointings_list]
+    if not isinstance(footprints_list, list):
+        footprints_list = [footprints_list]
     assert len(pointings_list) == len(footprints_list), (
         "pointings_list and footprints_list must be the same length."
     )
@@ -376,19 +388,30 @@ def calc_skymap_coverage(skymap_path: str, pointings_list: list, footprints_list
     prob_coverage = []
     in_footprints = []
     for pointings, footprint in zip(pointings_list, footprints_list):
-        print(f"Calculating coverage for {len(pointings)} pointings...")
+        if pointings.isscalar:
+            print("Calculating coverage for 1 pointing...")
+        else:
+            print(f"Calculating coverage for {len(pointings)} pointings...")
         # Mark hpx in pointings
-        in_footprint = []
-        for pointing in pointings:
-            in_pointing = footprint.in_footprint(
+        if pointings.isscalar:
+            in_footprint = footprint.in_footprint(
                 ra_obj=sc_skymap.ra.deg,
                 dec_obj=sc_skymap.dec.deg,
-                ra_exp=pointing.ra.deg,
-                dec_exp=pointing.dec.deg,
+                ra_exp=pointings.ra.deg,
+                dec_exp=pointings.dec.deg,
             )
-            in_footprint.append(in_pointing)
-        # Reduce to mask of covered hpxs
-        in_footprint = np.logical_or.reduce(in_footprint)
+        else:
+            in_footprint = []
+            for pointing in pointings:
+                in_pointing = footprint.in_footprint(
+                    ra_obj=sc_skymap.ra.deg,
+                    dec_obj=sc_skymap.dec.deg,
+                    ra_exp=pointing.ra.deg,
+                    dec_exp=pointing.dec.deg,
+                )
+                in_footprint.append(in_pointing)
+            # Reduce to mask of covered hpxs
+            in_footprint = np.logical_or.reduce(in_footprint)
         # Append probability covered by this telescope
         prob_coverage.append(np.sum(hpx_probs[in_footprint]))
         # Append mask of hpxs covered by this telescope
@@ -397,4 +420,7 @@ def calc_skymap_coverage(skymap_path: str, pointings_list: list, footprints_list
     in_footprints = np.logical_or.reduce(in_footprints)
     # Calculate total probability covered by all telescopes
     prob_coverage_total = np.sum(hpx_probs[in_footprints])
-    return prob_coverage_total, prob_coverage
+    if len(pointings_list) > 1:
+        return prob_coverage_total, prob_coverage
+    else:
+        return prob_coverage_total
