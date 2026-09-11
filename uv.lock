@@ -531,9 +531,7 @@ dependencies = [
     { name = "lxml" },
     { name = "pandas" },
     { name = "parmap" },
-    { name = "pytest" },
     { name = "regions" },
-    { name = "sphinxcontrib-typer" },
     { name = "typer" },
 ]
 
@@ -547,8 +545,10 @@ dev = [
     { name = "ipython" },
     { name = "pre-commit" },
     { name = "pydata-sphinx-theme" },
+    { name = "pytest" },
     { name = "ruff" },
     { name = "sphinx" },
+    { name = "sphinxcontrib-typer" },
 ]
 
 [package.metadata]
@@ -558,9 +558,7 @@ requires-dist = [
     { name = "lxml", specifier = ">=6.0.2" },
     { name = "pandas", specifier = ">=2.3.0" },
     { name = "parmap", specifier = ">=1.7.0" },
-    { name = "pytest", specifier = ">=8.3.5" },
     { name = "regions", specifier = ">=0.10" },
-    { name = "sphinxcontrib-typer", specifier = ">=0.10.0" },
     { name = "typer", specifier = ">=0.16.0" },
     { name = "ztfquery", marker = "extra == 'ztf'", specifier = ">=1.28.0" },
 ]
@@ -571,8 +569,10 @@ dev = [
     { name = "ipython", specifier = ">=9.17.1" },
     { name = "pre-commit", specifier = ">=4.2.0" },
     { name = "pydata-sphinx-theme", specifier = ">=0.21.0" },
+    { name = "pytest", specifier = ">=8.3.5" },
     { name = "ruff", specifier = ">=0.11.6" },
     { name = "sphinx", specifier = ">=9.1.0" },
+    { name = "sphinxcontrib-typer", specifier = ">=0.10.0" },
 ]
 
 [[package]]
