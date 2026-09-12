@@ -1,0 +1,40 @@
+healpix\_painter.io.parser.BasicParser
+======================================
+
+.. currentmodule:: healpix_painter.io.parser
+
+.. autoclass:: BasicParser
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~BasicParser.__init__
+      ~BasicParser.add_argument
+      ~BasicParser.add_argument_group
+      ~BasicParser.add_mutually_exclusive_group
+      ~BasicParser.add_subparsers
+      ~BasicParser.convert_arg_line_to_args
+      ~BasicParser.error
+      ~BasicParser.exit
+      ~BasicParser.format_help
+      ~BasicParser.format_usage
+      ~BasicParser.get_default
+      ~BasicParser.parse_args
+      ~BasicParser.parse_intermixed_args
+      ~BasicParser.parse_known_args
+      ~BasicParser.parse_known_intermixed_args
+      ~BasicParser.print_help
+      ~BasicParser.print_usage
+      ~BasicParser.register
+      ~BasicParser.set_defaults
+   
+   
+
+   
+   
+   

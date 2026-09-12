@@ -1,0 +1,6 @@
+healpix\_painter.io.parser.BasicParser.parse\_intermixed\_args
+==============================================================
+
+.. currentmodule:: healpix_painter.io.parser
+
+.. automethod:: BasicParser.parse_intermixed_args

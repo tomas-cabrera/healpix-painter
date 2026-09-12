@@ -1,0 +1,6 @@
+healpix\_painter.cli.healpix\_painter
+=====================================
+
+.. currentmodule:: healpix_painter.cli
+
+.. autofunction:: healpix_painter

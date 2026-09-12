@@ -1,0 +1,6 @@
+healpix\_painter.footprints.Footprint.region\_coords\_from\_regions
+===================================================================
+
+.. currentmodule:: healpix_painter.footprints
+
+.. automethod:: Footprint.region_coords_from_regions

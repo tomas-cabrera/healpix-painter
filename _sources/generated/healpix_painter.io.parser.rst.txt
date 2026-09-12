@@ -1,0 +1,13 @@
+healpix\_painter.io.parser
+==========================
+
+.. automodule:: healpix_painter.io.parser
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      BasicParser
+   

@@ -1,0 +1,6 @@
+healpix\_painter.io.plotting.plot\_skymap\_gradient
+===================================================
+
+.. currentmodule:: healpix_painter.io.plotting
+
+.. autofunction:: plot_skymap_gradient

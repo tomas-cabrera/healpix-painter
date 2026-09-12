@@ -1,0 +1,6 @@
+healpix\_painter.io.parser.BasicParser.convert\_arg\_line\_to\_args
+===================================================================
+
+.. currentmodule:: healpix_painter.io.parser
+
+.. automethod:: BasicParser.convert_arg_line_to_args

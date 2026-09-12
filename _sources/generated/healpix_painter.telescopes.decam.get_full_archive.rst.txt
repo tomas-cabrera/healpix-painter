@@ -1,0 +1,6 @@
+healpix\_painter.telescopes.decam.get\_full\_archive
+====================================================
+
+.. currentmodule:: healpix_painter.telescopes.decam
+
+.. autofunction:: get_full_archive

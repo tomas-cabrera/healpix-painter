@@ -1,0 +1,6 @@
+healpix\_painter.healpix.parse\_skymap\_args
+============================================
+
+.. currentmodule:: healpix_painter.healpix
+
+.. autofunction:: parse_skymap_args

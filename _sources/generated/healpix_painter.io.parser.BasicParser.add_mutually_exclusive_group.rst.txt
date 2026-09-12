@@ -1,0 +1,6 @@
+healpix\_painter.io.parser.BasicParser.add\_mutually\_exclusive\_group
+======================================================================
+
+.. currentmodule:: healpix_painter.io.parser
+
+.. automethod:: BasicParser.add_mutually_exclusive_group

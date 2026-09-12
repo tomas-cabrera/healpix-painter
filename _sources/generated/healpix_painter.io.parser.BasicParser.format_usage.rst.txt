@@ -1,0 +1,6 @@
+healpix\_painter.io.parser.BasicParser.format\_usage
+====================================================
+
+.. currentmodule:: healpix_painter.io.parser
+
+.. automethod:: BasicParser.format_usage

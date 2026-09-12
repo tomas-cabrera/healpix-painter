@@ -1,0 +1,6 @@
+healpix\_painter.io.parser.BasicParser.exit
+===========================================
+
+.. currentmodule:: healpix_painter.io.parser
+
+.. automethod:: BasicParser.exit

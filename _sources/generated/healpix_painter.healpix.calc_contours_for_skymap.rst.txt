@@ -1,0 +1,6 @@
+healpix\_painter.healpix.calc\_contours\_for\_skymap
+====================================================
+
+.. currentmodule:: healpix_painter.healpix
+
+.. autofunction:: calc_contours_for_skymap

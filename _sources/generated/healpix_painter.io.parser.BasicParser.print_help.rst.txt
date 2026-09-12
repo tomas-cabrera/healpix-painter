@@ -1,0 +1,6 @@
+healpix\_painter.io.parser.BasicParser.print\_help
+==================================================
+
+.. currentmodule:: healpix_painter.io.parser
+
+.. automethod:: BasicParser.print_help

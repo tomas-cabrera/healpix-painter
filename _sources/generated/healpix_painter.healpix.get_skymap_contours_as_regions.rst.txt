@@ -1,0 +1,6 @@
+healpix\_painter.healpix.get\_skymap\_contours\_as\_regions
+===========================================================
+
+.. currentmodule:: healpix_painter.healpix
+
+.. autofunction:: get_skymap_contours_as_regions

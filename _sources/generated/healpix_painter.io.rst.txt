@@ -1,0 +1,15 @@
+healpix\_painter.io
+===================
+
+.. automodule:: healpix_painter.io
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   output
+   parser
+   plotting

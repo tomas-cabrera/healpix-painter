@@ -1,0 +1,6 @@
+healpix\_painter.io.parser.BasicParser.add\_subparsers
+======================================================
+
+.. currentmodule:: healpix_painter.io.parser
+
+.. automethod:: BasicParser.add_subparsers

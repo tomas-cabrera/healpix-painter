@@ -1,0 +1,737 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Plotting Utilities &#8212; healpix-painter 0.3.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "auto";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinxcontrib_typer.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+
+    <script src="../_static/documentation_options.js?v=f129cdf0"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/plotting';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Telescope Implementation" href="telescopes.html" />
+    <link rel="prev" title="Calculating HEALPix Skymap Coverage" href="coverage.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="auto">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">healpix-painter 0.3.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cli.html">
+    CLI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/tomas-cabrera/healpix-painter" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cli.html">
+    CLI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/tomas-cabrera/healpix-painter" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coverage.html">Calculating HEALPix Skymap Coverage</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Plotting Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="telescopes.html">Telescope Implementation</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Plotting Utilities</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="plotting-utilities">
+<span id="plotting"></span><h1>Plotting Utilities<a class="headerlink" href="#plotting-utilities" title="Link to this heading">#</a></h1>
+<p>This section describes the plotting ultilities available in <code class="docutils literal notranslate"><span class="pre">healpix-painter</span></code>.
+In general, these functions facilitate the addition of some element to an existing Matplotlib Axes,
+and are best used with Axes created with <a class="reference external" href="https://lscsoft.docs.ligo.org/ligo.skymap/plot/allsky.html">the special WCSAxes subclasses provided by ligo.skymap</a>.</p>
+<section id="plotting-skymaps-as-gradients">
+<h2>Plotting Skymaps as Gradients<a class="headerlink" href="#plotting-skymaps-as-gradients" title="Link to this heading">#</a></h2>
+<p>After initializing a suitable Axes object,
+skymaps can be plotted as gradients using <a class="reference internal" href="../generated/healpix_painter.io.plotting.plot_skymap_gradient.html#healpix_painter.io.plotting.plot_skymap_gradient" title="healpix_painter.io.plotting.plot_skymap_gradient"><code class="xref py py-func docutils literal notranslate"><span class="pre">healpix_painter.io.plotting.plot_skymap_gradient()</span></code></a>:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
+
+<span class="gp">In [2]: </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="gp">In [3]: </span><span class="kn">import</span><span class="w"> </span><span class="nn">ligo.skymap.plot</span>
+
+<span class="gp">In [4]: </span><span class="kn">from</span><span class="w"> </span><span class="nn">healpix_painter.io.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_skymap_gradient</span>
+
+<span class="gp">In [5]: </span><span class="n">DATA_DIR</span> <span class="o">=</span> <span class="s2">"doc/data"</span>
+
+<span class="go"># Initialize axes</span>
+<span class="gp">In [6]: </span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s2">"astro hours mollweide"</span><span class="p">)</span>
+
+<span class="go"># Add grid lines</span>
+<span class="gp">In [7]: </span><span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="go"># Select a sample skymap</span>
+<span class="gp">In [8]: </span><span class="n">skymap_path</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">,</span> <span class="s2">"S240511i.Bilby.multiorder.fits"</span><span class="p">)</span>
+
+<span class="go"># Plot skymap</span>
+<span class="gp">In [9]: </span><span class="n">plot_skymap_gradient</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">skymap_path</span><span class="p">)</span>
+<span class="gh">Out[9]: </span><span class="go">&lt;matplotlib.image.AxesImage at 0x7f9873268f50&gt;</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/gradient_mollweide.png"><img alt="../_images/gradient_mollweide.png" src="../_images/gradient_mollweide.png" style="width: 4in;" />
+</a>
+<p>Other ligo.skymap Axes subclasses can be used,
+and arguments for the underlying <code class="xref py py-func docutils literal notranslate"><span class="pre">matplotlib.pyplot.imshow()</span></code> call can be passed:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [10]: </span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">projection</span><span class="o">=</span><span class="s2">"astro hours zoom"</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">center</span><span class="o">=</span><span class="s2">"11.25h -19d"</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">radius</span><span class="o">=</span><span class="s2">"11 deg"</span><span class="p">,</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span>
+
+<span class="gp">In [11]: </span><span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="go"># Plot skymap</span>
+<span class="gp">In [12]: </span><span class="n">plot_skymap_gradient</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">ax</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">skymap_path</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">imshow_kwargs</span><span class="o">=</span><span class="p">{</span>
+<span class="gp">   ....: </span>        <span class="s2">"cmap"</span><span class="p">:</span> <span class="s2">"plasma"</span><span class="p">,</span>
+<span class="gp">   ....: </span>        <span class="s2">"alpha"</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="p">},</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span>
+<span class="gh">Out[12]: </span><span class="go">&lt;matplotlib.image.AxesImage at 0x7f9872fa6510&gt;</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/gradient_zoom.png"><img alt="../_images/gradient_zoom.png" src="../_images/gradient_zoom.png" style="width: 4in;" />
+</a>
+</section>
+<section id="plotting-skymaps-as-contours">
+<h2>Plotting Skymaps as Contours<a class="headerlink" href="#plotting-skymaps-as-contours" title="Link to this heading">#</a></h2>
+<p>Plotting skymap contours functions similarly to plotting gradients:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [13]: </span><span class="kn">from</span><span class="w"> </span><span class="nn">healpix_painter.io.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_skymap_contours</span>
+
+<span class="gp">In [14]: </span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">projection</span><span class="o">=</span><span class="s2">"astro hours zoom"</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">center</span><span class="o">=</span><span class="s2">"11.25h -19d"</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">radius</span><span class="o">=</span><span class="s2">"11 deg"</span><span class="p">,</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span>
+
+<span class="gp">In [15]: </span><span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="go"># Plot contours</span>
+<span class="gp">In [16]: </span><span class="n">plot_skymap_contours</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">skymap_path</span><span class="p">)</span>
+<span class="gh">Out[16]: </span><span class="go">&lt;matplotlib.contour.QuadContourSet at 0x7f9872e26060&gt;</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/contours_basic.png"><img alt="../_images/contours_basic.png" src="../_images/contours_basic.png" style="width: 4in;" />
+</a>
+<p>This function calls the ligo.skymap <cite>contour_hpx &lt;https://lscsoft.docs.ligo.org/ligo.skymap/plot/allsky.html#ligo.skymap.plot.allsky.AutoScaledWCSAxes.contour_hpx&gt;</cite> function by default;
+setting <code class="docutils literal notranslate"><span class="pre">filled=True</span></code> will call <cite>contourf_hpx &lt;https://lscsoft.docs.ligo.org/ligo.skymap/plot/allsky.html#ligo.skymap.plot.allsky.AutoScaledWCSAxes.contourf_hpx&gt;</cite> instead, for filled contours.
+Parameters for either can be set with the <code class="docutils literal notranslate"><span class="pre">contour_kwargs</span></code> argument:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [17]: </span><span class="kn">from</span><span class="w"> </span><span class="nn">healpix_painter.io.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_skymap_contours</span>
+
+<span class="gp">In [18]: </span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">projection</span><span class="o">=</span><span class="s2">"astro hours zoom"</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">center</span><span class="o">=</span><span class="s2">"11.25h -19d"</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">radius</span><span class="o">=</span><span class="s2">"11 deg"</span><span class="p">,</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span>
+
+<span class="gp">In [19]: </span><span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="gp">In [20]: </span><span class="n">plot_skymap_contours</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">ax</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">skymap_path</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">contours</span><span class="o">=</span><span class="p">[</span><span class="mi">90</span><span class="p">],</span>
+<span class="gp">   ....: </span>    <span class="n">contour_kwargs</span><span class="o">=</span><span class="p">{</span>
+<span class="gp">   ....: </span>        <span class="s2">"colors"</span><span class="p">:</span> <span class="s2">"xkcd:crimson"</span><span class="p">,</span>
+<span class="gp">   ....: </span>        <span class="s2">"linestyles"</span><span class="p">:</span> <span class="s2">"dashed"</span><span class="p">,</span>
+<span class="gp">   ....: </span>        <span class="s2">"linewidths"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+<span class="gp">   ....: </span>        <span class="s2">"alpha"</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="p">},</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span>
+<span class="gh">Out[20]: </span><span class="go">&lt;matplotlib.contour.QuadContourSet at 0x7f9872e26210&gt;</span>
+
+<span class="gp">In [21]: </span><span class="n">plot_skymap_contours</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">ax</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">skymap_path</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">contours</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">50</span><span class="p">],</span>
+<span class="gp">   ....: </span>    <span class="n">filled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">contour_kwargs</span><span class="o">=</span><span class="p">{</span>
+<span class="gp">   ....: </span>        <span class="s2">"colors"</span><span class="p">:</span> <span class="s2">"xkcd:darkblue"</span><span class="p">,</span>
+<span class="gp">   ....: </span>        <span class="s2">"alpha"</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="p">},</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span>
+<span class="gh">Out[21]: </span><span class="go">&lt;matplotlib.contour.QuadContourSet at 0x7f9872e54bf0&gt;</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/contours_extra.png"><img alt="../_images/contours_extra.png" src="../_images/contours_extra.png" style="width: 4in;" />
+</a>
+</section>
+<section id="plotting-telescope-footprints">
+<h2>Plotting Telescope Footprints<a class="headerlink" href="#plotting-telescope-footprints" title="Link to this heading">#</a></h2>
+<p>To plot on-sky footprints, the pointings must first be cast into an <a class="reference external" href="https://docs.astropy.org/en/stable/api/astropy.coordinates.SkyCoord.html">Astropy SkyCoord object</a>:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [22]: </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.coordinates</span><span class="w"> </span><span class="kn">import</span> <span class="n">SkyCoord</span>
+
+<span class="gp">In [23]: </span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
+
+<span class="gp">In [24]: </span><span class="n">pointings_table</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">pa</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">,</span> <span class="s2">"S240511i.pointings_decam.csv"</span><span class="p">))</span>
+
+<span class="gp">In [25]: </span><span class="n">skycoord_decam</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">ra</span><span class="o">=</span><span class="n">pointings_table</span><span class="p">[</span><span class="s2">"ra"</span><span class="p">],</span>
+<span class="gp">   ....: </span>    <span class="n">dec</span><span class="o">=</span><span class="n">pointings_table</span><span class="p">[</span><span class="s2">"dec"</span><span class="p">],</span>
+<span class="gp">   ....: </span>    <span class="n">unit</span><span class="o">=</span><span class="s2">"deg"</span><span class="p">,</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span>
+
+<span class="gp">In [26]: </span><span class="n">skycoord_ztf</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">ra</span><span class="o">=</span><span class="n">pointings_table</span><span class="p">[</span><span class="s2">"ra"</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+<span class="gp">   ....: </span>    <span class="n">dec</span><span class="o">=</span><span class="n">pointings_table</span><span class="p">[</span><span class="s2">"dec"</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+<span class="gp">   ....: </span>    <span class="n">unit</span><span class="o">=</span><span class="s2">"deg"</span><span class="p">,</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span>
+</pre></div>
+</div>
+<p>Footprints can then be added to an initialized Axes using <a class="reference internal" href="../generated/healpix_painter.io.plotting.plot_footprints.html#healpix_painter.io.plotting.plot_footprints" title="healpix_painter.io.plotting.plot_footprints"><code class="xref py py-func docutils literal notranslate"><span class="pre">healpix_painter.io.plotting.plot_footprints()</span></code></a>,
+after specifying the appropriate <a class="reference internal" href="../generated/healpix_painter.footprints.Footprint.html#healpix_painter.footprints.Footprint" title="healpix_painter.footprints.Footprint"><code class="xref py py-class docutils literal notranslate"><span class="pre">healpix_painter.footprints.Footprint</span></code></a> object:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [27]: </span><span class="kn">from</span><span class="w"> </span><span class="nn">healpix_painter.io.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_footprints</span>
+
+<span class="gp">In [28]: </span><span class="kn">from</span><span class="w"> </span><span class="nn">healpix_painter.telescopes.decam</span><span class="w"> </span><span class="kn">import</span> <span class="n">DECamFootprint</span>
+
+<span class="gp">In [29]: </span><span class="kn">from</span><span class="w"> </span><span class="nn">healpix_painter.telescopes.ztf</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZTFFootprint</span>
+
+<span class="gp">In [30]: </span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">projection</span><span class="o">=</span><span class="s2">"astro hours zoom"</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">center</span><span class="o">=</span><span class="s2">"11.25h -19d"</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">radius</span><span class="o">=</span><span class="s2">"11 deg"</span><span class="p">,</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span>
+
+<span class="gp">In [31]: </span><span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="go"># DECam pointings</span>
+<span class="gp">In [32]: </span><span class="n">plot_footprints</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">ax</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">DECamFootprint</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">skycoord_decam</span><span class="p">,</span>
+<span class="gp">   ....: </span><span class="p">);</span>
+<span class="gp">   ....: </span>
+
+<span class="go"># ZTF pointings</span>
+<span class="gp">In [33]: </span><span class="n">plot_footprints</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">ax</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">ZTFFootprint</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">skycoord_ztf</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">fill_kwargs</span><span class="o">=</span><span class="p">{</span>
+<span class="gp">   ....: </span>        <span class="s2">"color"</span><span class="p">:</span> <span class="s2">"xkcd:orange"</span><span class="p">,</span>
+<span class="gp">   ....: </span>        <span class="s2">"fill"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+<span class="gp">   ....: </span>        <span class="s2">"linewidth"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="p">},</span>
+<span class="gp">   ....: </span><span class="p">);</span>
+<span class="gp">   ....: </span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/footprints.png"><img alt="../_images/footprints.png" src="../_images/footprints.png" style="width: 4in;" />
+</a>
+<p>See <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.fill.html">matplotlib.axes.Axes.fill</a> for the available keywords to change the footprint appearance.</p>
+<p>Footprint plotting behaves mostly as expected near the poles, but some artifacts may be present along the prime meridian:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [34]: </span><span class="n">pointings_poles</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">pa</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">,</span> <span class="s2">"S250830bp.pointings_decam.csv"</span><span class="p">))</span>
+
+<span class="gp">In [35]: </span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">projection</span><span class="o">=</span><span class="s2">"astro hours zoom"</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">center</span><span class="o">=</span><span class="s2">"3.5h -88.5d"</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">radius</span><span class="o">=</span><span class="s2">"2 deg"</span><span class="p">,</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span>
+
+<span class="gp">In [36]: </span><span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="gp">In [37]: </span><span class="n">skycoord_poles</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">ra</span><span class="o">=</span><span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">75</span><span class="p">],</span>
+<span class="gp">   ....: </span>    <span class="n">dec</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">89</span><span class="p">,</span> <span class="o">-</span><span class="mi">88</span><span class="p">],</span>
+<span class="gp">   ....: </span>    <span class="n">unit</span><span class="o">=</span><span class="s2">"deg"</span><span class="p">,</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span>
+
+<span class="gp">In [38]: </span><span class="n">plot_footprints</span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">ax</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">DECamFootprint</span><span class="p">,</span>
+<span class="gp">   ....: </span>    <span class="n">skycoord_poles</span><span class="p">,</span>
+<span class="gp">   ....: </span><span class="p">);</span>
+<span class="gp">   ....: </span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/footprints_poles.png"><img alt="../_images/footprints_poles.png" src="../_images/footprints_poles.png" style="width: 4in;" />
+</a>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="coverage.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Calculating HEALPix Skymap Coverage</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="telescopes.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Telescope Implementation</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-skymaps-as-gradients">Plotting Skymaps as Gradients</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-skymaps-as-contours">Plotting Skymaps as Contours</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-telescope-footprints">Plotting Telescope Footprints</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user_guide/plotting.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Tomás Cabrera.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

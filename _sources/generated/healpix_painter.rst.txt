@@ -1,0 +1,18 @@
+﻿healpix\_painter
+================
+
+.. automodule:: healpix_painter
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   basicpainter
+   cli
+   footprints
+   healpix
+   io
+   telescopes

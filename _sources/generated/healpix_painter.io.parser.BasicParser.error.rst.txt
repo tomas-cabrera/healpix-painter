@@ -1,0 +1,6 @@
+healpix\_painter.io.parser.BasicParser.error
+============================================
+
+.. currentmodule:: healpix_painter.io.parser
+
+.. automethod:: BasicParser.error

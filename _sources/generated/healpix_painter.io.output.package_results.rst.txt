@@ -1,0 +1,6 @@
+healpix\_painter.io.output.package\_results
+===========================================
+
+.. currentmodule:: healpix_painter.io.output
+
+.. autofunction:: package_results

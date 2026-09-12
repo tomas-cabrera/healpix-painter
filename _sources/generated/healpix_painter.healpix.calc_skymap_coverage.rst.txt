@@ -1,0 +1,6 @@
+healpix\_painter.healpix.calc\_skymap\_coverage
+===============================================
+
+.. currentmodule:: healpix_painter.healpix
+
+.. autofunction:: calc_skymap_coverage

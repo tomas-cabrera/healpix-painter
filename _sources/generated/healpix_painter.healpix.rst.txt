@@ -1,0 +1,20 @@
+healpix\_painter.healpix
+========================
+
+.. automodule:: healpix_painter.healpix
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      calc_contours_for_skymap
+      calc_credible_levels_for_skymap
+      calc_radecs_for_skymap
+      calc_skymap_coverage
+      find_exposures_for_skymap
+      get_skymap_contours_as_regions
+      mask_pointings_in_skymap
+      parse_skymap_args
+   

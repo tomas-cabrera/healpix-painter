@@ -1,0 +1,20 @@
+healpix\_painter.footprints
+===========================
+
+.. automodule:: healpix_painter.footprints
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      make_footprint_crtf
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      Footprint
+   

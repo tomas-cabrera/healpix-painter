@@ -1,0 +1,15 @@
+healpix\_painter.io.plotting
+============================
+
+.. automodule:: healpix_painter.io.plotting
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      plot_footprints
+      plot_skymap_contours
+      plot_skymap_gradient
+   

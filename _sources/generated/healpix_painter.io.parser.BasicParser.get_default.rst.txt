@@ -1,0 +1,6 @@
+healpix\_painter.io.parser.BasicParser.get\_default
+===================================================
+
+.. currentmodule:: healpix_painter.io.parser
+
+.. automethod:: BasicParser.get_default

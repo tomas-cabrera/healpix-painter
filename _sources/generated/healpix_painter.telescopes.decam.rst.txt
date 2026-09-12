@@ -1,0 +1,14 @@
+healpix\_painter.telescopes.decam
+=================================
+
+.. automodule:: healpix_painter.telescopes.decam
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      get_archival_tiling
+      get_full_archive
+   

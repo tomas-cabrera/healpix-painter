@@ -1,0 +1,14 @@
+healpix\_painter.telescopes
+===========================
+
+.. automodule:: healpix_painter.telescopes
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   decam
+   ztf

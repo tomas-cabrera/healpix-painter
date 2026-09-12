@@ -1,0 +1,13 @@
+healpix\_painter.cli
+====================
+
+.. automodule:: healpix_painter.cli
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      healpix_painter
+   

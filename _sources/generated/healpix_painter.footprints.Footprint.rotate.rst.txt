@@ -1,0 +1,6 @@
+healpix\_painter.footprints.Footprint.rotate
+============================================
+
+.. currentmodule:: healpix_painter.footprints
+
+.. automethod:: Footprint.rotate

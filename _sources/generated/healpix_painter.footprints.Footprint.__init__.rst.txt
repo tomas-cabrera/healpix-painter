@@ -1,0 +1,6 @@
+healpix\_painter.footprints.Footprint.\_\_init\_\_
+==================================================
+
+.. currentmodule:: healpix_painter.footprints
+
+.. automethod:: Footprint.__init__

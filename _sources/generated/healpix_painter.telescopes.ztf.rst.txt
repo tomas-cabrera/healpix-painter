@@ -1,0 +1,6 @@
+healpix\_painter.telescopes.ztf
+===============================
+
+.. automodule:: healpix_painter.telescopes.ztf
+
+   

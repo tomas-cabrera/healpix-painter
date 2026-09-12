@@ -1,0 +1,6 @@
+healpix\_painter.basicpainter.score\_by\_probadd
+================================================
+
+.. currentmodule:: healpix_painter.basicpainter
+
+.. autofunction:: score_by_probadd

@@ -1,0 +1,6 @@
+healpix\_painter.io.parser.BasicParser.register
+===============================================
+
+.. currentmodule:: healpix_painter.io.parser
+
+.. automethod:: BasicParser.register

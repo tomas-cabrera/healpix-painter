@@ -1,0 +1,6 @@
+healpix\_painter.io.parser.BasicParser.parse\_known\_args
+=========================================================
+
+.. currentmodule:: healpix_painter.io.parser
+
+.. automethod:: BasicParser.parse_known_args

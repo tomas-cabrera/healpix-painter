@@ -1,0 +1,6 @@
+healpix\_painter.healpix.mask\_pointings\_in\_skymap
+====================================================
+
+.. currentmodule:: healpix_painter.healpix
+
+.. autofunction:: mask_pointings_in_skymap

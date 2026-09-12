@@ -1,0 +1,14 @@
+healpix\_painter.io.output
+==========================
+
+.. automodule:: healpix_painter.io.output
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      package_results
+      skycoord_median
+   

@@ -1,0 +1,6 @@
+healpix\_painter.footprints.make\_footprint\_crtf
+=================================================
+
+.. currentmodule:: healpix_painter.footprints
+
+.. autofunction:: make_footprint_crtf

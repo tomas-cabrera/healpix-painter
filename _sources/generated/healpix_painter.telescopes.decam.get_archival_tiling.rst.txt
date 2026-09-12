@@ -1,0 +1,6 @@
+healpix\_painter.telescopes.decam.get\_archival\_tiling
+=======================================================
+
+.. currentmodule:: healpix_painter.telescopes.decam
+
+.. autofunction:: get_archival_tiling

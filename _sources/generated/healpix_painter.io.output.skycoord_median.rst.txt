@@ -1,0 +1,6 @@
+healpix\_painter.io.output.skycoord\_median
+===========================================
+
+.. currentmodule:: healpix_painter.io.output
+
+.. autofunction:: skycoord_median

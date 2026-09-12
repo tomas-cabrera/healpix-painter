@@ -1,0 +1,15 @@
+healpix\_painter.basicpainter
+=============================
+
+.. automodule:: healpix_painter.basicpainter
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      basic_painter
+      score_by_probadd
+      score_by_probden_probadd
+   

@@ -1,0 +1,26 @@
+healpix\_painter.footprints.Footprint
+=====================================
+
+.. currentmodule:: healpix_painter.footprints
+
+.. autoclass:: Footprint
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      ~Footprint.__init__
+      ~Footprint.in_footprint
+      ~Footprint.region_coords_from_regions
+      ~Footprint.regions_from_region_coords
+      ~Footprint.rotate
+   
+   
+
+   
+   
+   

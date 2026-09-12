@@ -1,0 +1,6 @@
+healpix\_painter.basicpainter.basic\_painter
+============================================
+
+.. currentmodule:: healpix_painter.basicpainter
+
+.. autofunction:: basic_painter

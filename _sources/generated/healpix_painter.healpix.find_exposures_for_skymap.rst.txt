@@ -1,0 +1,6 @@
+healpix\_painter.healpix.find\_exposures\_for\_skymap
+=====================================================
+
+.. currentmodule:: healpix_painter.healpix
+
+.. autofunction:: find_exposures_for_skymap

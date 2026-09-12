@@ -1,0 +1,6 @@
+healpix\_painter.healpix.calc\_radecs\_for\_skymap
+==================================================
+
+.. currentmodule:: healpix_painter.healpix
+
+.. autofunction:: calc_radecs_for_skymap
