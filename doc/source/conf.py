@@ -44,7 +44,7 @@ html_theme_options = {
     "icon_links": [
         {
             "name": "GitHub",
-            "url": "https://github.com/yourorg/yourproject",
+            "url": "https://github.com/tomas-cabrera/healpix-painter",
             "icon": "fa-brands fa-github",
         },
     ],

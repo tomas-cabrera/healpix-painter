@@ -93,20 +93,3 @@ footprint_path, footprint = make_footprint_crtf(
     output_path=convexhull_path,
     convexhull=True,
 )
-
-# Plot
-# import matplotlib.pyplot as plt
-# print(cornras)
-# print(corndecs)
-# plt.plot(
-#     centra + 360 if centra < 180 else centra,
-#     centdec,
-#     "o",
-# )
-# for ras, decs in zip(cornras, corndecs):
-#     plt.plot(
-#         [ra + 360 if ra < 180 else ra for ra in ras],
-#         decs,
-#     )
-# plt.show()
-# plt.close()

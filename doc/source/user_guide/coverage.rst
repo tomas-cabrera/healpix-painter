@@ -15,7 +15,7 @@ Single-Facility Coverage
     DATA_DIR = "doc/data"
 
     # Select a sample skymap
-    skymap_path = pa.join(DATA_DIR, "S250830bp.Bilby.multiorder.fits")
+    skymap_path = pa.join(DATA_DIR, "S240511i.Bilby.multiorder.fits")
 
 The skymap path is directly passed to :func:`calc_skymap_coverage() <healpix_painter.healpix.calc_skymap_coverage>`;
 the pointings must be passed as an `Astropy SkyCoord object <https://docs.astropy.org/en/stable/api/astropy.coordinates.SkyCoord.html>`__.
@@ -26,7 +26,7 @@ the pointings must be passed as an `Astropy SkyCoord object <https://docs.astrop
     from astropy.coordinates import SkyCoord
     from astropy.table import Table
 
-    pointings_path = pa.join(DATA_DIR, "S250830bp.pointings_decam.csv")
+    pointings_path = pa.join(DATA_DIR, "S240511i.pointings_decam.csv")
 
     pointings_table = Table.read(pointings_path, format="csv")
 

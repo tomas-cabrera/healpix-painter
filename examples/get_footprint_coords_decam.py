@@ -64,36 +64,3 @@ footprint_path, footprint = make_footprint_crtf(
     output_path=convexhull_path,
     convexhull=True,
 )
-
-# # Reload the footprint and check that the coords are the same
-# from healpix_painter import footprints
-
-# footprint_read = footprints.Footprint(regions_file=footprint_path)
-# cornras_rotated_read = np.array(footprint_read.region_coords[:, 0, :])
-# corndecs_rotated_read = np.array(footprint_read.region_coords[:, 1, :])
-# # These should be roughly identical (entries should be ~0)
-# coord_errors = footprint_read.region_coords - footprint.region_coords
-# tol = 0.25
-# print(
-#     f'After reload of saved footprint, median coordinate error is {np.median(coord_errors) * 3600:.3f}", with {np.sum(coord_errors > tol / 3600)}/{np.prod(np.array(coord_errors.shape))} coords off by >{tol}" arcsec'
-# )
-
-# from tilings.decam import DECamFootprint
-# print(DECamFootprint.region_coords - footprint.region_coords)
-
-# import matplotlib.pyplot as plt
-# ax = plt.subplot()
-# # We can plot the regions, but they need to be converted to np.pixel coordinates first
-# # To make the CCDs plot with the correct position w.r.t. one another, a specific WCS needs to be chosen.
-# # Because it's not clear what the definition of the centra/dec are,
-# # perhaps we should use a CCD (e.g. the first one) as the reference frame.
-# # Being consistent across telescopes could be difficult.
-# for i in range(n_ext-1):
-#     # plt.plot(
-#     #     [r - 360 if r > 180 else r for r in cornras[i]],
-#     #     corndecs[i]
-#     # )
-#     np.pixel_region = regions[i].to_np.pixel(wcss[0])
-#     np.pixel_region.plot()
-# plt.show()
-# plt.close()

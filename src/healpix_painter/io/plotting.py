@@ -63,7 +63,8 @@ def plot_skymap_contours(
     ax,
     skymap_path,
     contours=[50, 90],
-    plot_kwargs={
+    filled=False,
+    contour_kwargs={
         "colors": "xkcd:bluegreen",
         "alpha": 0.8,
     },
@@ -78,7 +79,9 @@ def plot_skymap_contours(
         The path to the skymap file.
     contours : list, optional, default [50, 90]
         The contour levels to plot.
-    plot_kwargs : dict, optional
+    filled : bool, optional, default False
+        Whether to fill the contours.
+    contour_kwargs : dict, optional
         Keyword arguments to pass to matplotlib.pyplot.contour.
 
     Returns
@@ -100,7 +103,14 @@ def plot_skymap_contours(
     # Calculate credible levels
     cls = calc_credible_levels_for_skymap(skymap_flat)
     # Plot contours
-    contour_set = ax.contour_hpx(cls, nested=True, levels=contours, **plot_kwargs)
+    if filled:
+        contour_set = ax.contourf_hpx(
+            cls, nested=True, levels=contours, **contour_kwargs
+        )
+    else:
+        contour_set = ax.contour_hpx(
+            cls, nested=True, levels=contours, **contour_kwargs
+        )
 
     return contour_set
 
@@ -109,7 +119,7 @@ def plot_footprints(
     ax,
     footprint,
     scs,
-    plot_kwargs={
+    fill_kwargs={
         "color": "xkcd:bluegreen",
         "ls": "",
         "alpha": 0.5,
@@ -125,7 +135,7 @@ def plot_footprints(
         The footprint to plot.
     scs : astropy.coordinates.SkyCoord or list of astropy.coordinates.SkyCoord
         The coordinates at which to plot the footprint.
-    plot_kwargs : dict, optional
+    fill_kwargs : dict, optional
         Keyword arguments to pass to matplotlib.pyplot.fill.
 
     Returns
@@ -133,6 +143,10 @@ def plot_footprints(
     fills : list of matplotlib.patches.Polygon
         The list of filled polygons representing the plotted footprints.
     """
+
+    # Ensure scs is iterable
+    if scs.isscalar:
+        scs = [scs]
 
     # Iterate over skycoords
     fills = []
@@ -154,7 +168,7 @@ def plot_footprints(
                     np.rad2deg(sub_vertices[:, 0]),
                     np.rad2deg(sub_vertices[:, 1]),
                     transform=ax.get_transform("world"),
-                    **plot_kwargs,
+                    **fill_kwargs,
                 )
                 fills.append(fill)
 

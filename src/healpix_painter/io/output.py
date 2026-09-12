@@ -168,7 +168,7 @@ def package_results(
                 ax,
                 footprint,
                 filter_scs,
-                plot_kwargs={
+                fill_kwargs={
                     "color": FILTER2COLOR.get(f),
                     "ls": "",
                     "alpha": 0.5,
